@@ -45,7 +45,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
         </div>
       </div>
       
-      <div style={{ flex: 1, position: 'relative', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {showSearch && (
           <SearchBar onSearch={handleSearch} onNext={handleNextMatch} onPrev={handlePrevMatch} isActive={showSearch} />
         )}

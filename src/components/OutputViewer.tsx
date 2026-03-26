@@ -63,7 +63,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
         </div>
       </div>
       
-      <div style={{ flex: 1, position: 'relative', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {status === 'error' ? (
           <ErrorDisplay message={errorMsg} line={errorLine} col={errorCol} onFix={onFix} />
         ) : (
