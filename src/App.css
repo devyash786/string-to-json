@@ -176,21 +176,22 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 2rem;
-  gap: 1.5rem;
-  min-height: 0;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 0; /* Crucial for flex nested shrinking */
 }
 
 .workspace-card {
   flex: 1;
-  background: var(--bg-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background-color: var(--bg-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: inset 0 0 0 1px var(--shadow-inset), 0 24px 48px var(--shadow-primary);
   display: flex;
+  flex-direction: column;
+  min-height: 0; /* Crucial */
   overflow: hidden;
+  box-shadow: var(--shadow-xl), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .editor-container {
@@ -264,11 +265,14 @@ body {
   border-right: none;
 }
 
+/* Editor Panes */
 .pane-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  position: relative;
+  min-width: 0;
+  min-height: 0; /* Fixes Monaco flex overflow */
 }
 
 .diff-layout-container {

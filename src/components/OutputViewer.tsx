@@ -41,21 +41,21 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
         </div>
       </div>
       
-      <div className="editor-container" style={{ minHeight: '500px' }}>
+      <div style={{ flex: 1, position: 'relative', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         {status === 'error' ? (
           <ErrorDisplay message={errorMsg} line={errorLine} col={errorCol} onFix={onFix} />
         ) : (
           <Editor
-            height="65vh"
-            language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
+            height="100%"
+            language={mode === 'ts' ? 'typescript' : mode === 'yaml' ? 'yaml' : mode === 'csv' ? 'text' : 'json'}
             value={value}
             theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
             options={{
               readOnly: true,
-              minimap: { enabled: false },
+              minimap: { enabled: true },
               wordWrap: 'on',
-              formatOnPaste: false,
-              scrollbar: { verticalScrollbarSize: 8 },
+              formatOnPaste: true,
+              scrollBeyondLastLine: false,
               padding: { top: 16 }
             }}
           />
