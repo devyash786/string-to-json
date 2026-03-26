@@ -33,6 +33,7 @@ function App() {
   const [errorLine, setErrorLine] = useState<number | null>(null);
   const [errorCol, setErrorCol] = useState<number | null>(null);
   const [stats, setStats] = useState({ sizeKB: '0', keysCount: 0, maxDepth: 0 });
+  const [activeSample, setActiveSample] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -223,10 +224,10 @@ function App() {
           100% client-side. Your data never leaves the browser.
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-          <span className="badge"><Zap size={14} /> Instant</span>
-          <span className="badge"><ShieldCheck size={14} /> Private</span>
-          <span className="badge"><BrainCircuit size={14} /> Smart Parsing</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem', marginTop: '1.5rem' }}>
+          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><Zap size={12} /> INSTANT</div>
+          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><ShieldCheck size={12} /> PRIVATE</div>
+          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><BrainCircuit size={12} /> SMART PARSING</div>
         </div>
       </header>
 
@@ -241,18 +242,30 @@ function App() {
 
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
-            <select className="select-dropdown" onChange={(e) => {
-              if (e.target.value === 'escaped') setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"');
-              if (e.target.value === 'broken') setInputData("{'name': 'Dev', active: True, val: None,}");
-              if (e.target.value === 'log') setInputData("2026-03-26 [INFO] Payload received: {\"status\": 200, \"data\": [1,2,3]}");
-              e.target.value = 'none';
-            }}>
-              <option value="none">Parse as...</option>
-              <option value="escaped">Escaped string</option>
-              <option value="broken">Broken JSON</option>
-              <option value="log">Log payload</option>
-            </select>
-            <button className="icon-btn-ghost" title="Upload JSON" onClick={() => fileInputRef.current?.click()}>
+            <div className="modular-selector">
+              <button 
+                className={`modular-selector-btn ${activeSample === 'escaped' ? 'active' : ''}`}
+                onClick={() => { setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"'); setActiveSample('escaped'); }}
+                title="Try Escaped String"
+              >
+                Escaped
+              </button>
+              <button 
+                className={`modular-selector-btn ${activeSample === 'broken' ? 'active' : ''}`}
+                onClick={() => { setInputData("{'name': 'Dev', active: True, val: None,}"); setActiveSample('broken'); }}
+                title="Try Broken JSON"
+              >
+                Broken
+              </button>
+              <button 
+                className={`modular-selector-btn ${activeSample === 'log' ? 'active' : ''}`}
+                onClick={() => { setInputData("2026-03-26 [INFO] Payload received: {\"status\": 200, \"data\": [1,2,3]}"); setActiveSample('log'); }}
+                title="Try Log Payload"
+              >
+                Log
+              </button>
+            </div>
+            <button className="icon-btn-round" title="Upload JSON" onClick={() => fileInputRef.current?.click()}>
               <UploadCloud size={16} />
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
             </button>

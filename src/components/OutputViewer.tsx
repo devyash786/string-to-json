@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Copy } from 'lucide-react';
+import { Copy, ChevronDown } from 'lucide-react';
 import { ErrorDisplay } from './ErrorDisplay';
 
 interface OutputViewerProps {
@@ -49,8 +49,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
           <span className="sub-label" style={{ marginLeft: '8px' }}>Parsed result</span>
         </div>
         <div className="toolbar-actions" style={{ position: 'relative' }} ref={dropdownRef}>
-          <button onClick={onCopyFormatted} className="tool-btn primary" title="Copy Output" style={{ backgroundColor: 'var(--accent-primary)', color: 'white', borderRadius: '4px', border: 'none', padding: '4px 12px', fontSize: '12px' }}><Copy size={14} /> Copy</button>
-          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="select-dropdown" style={{ padding: '4px 8px', fontSize: '12px' }}>More...</button>
+          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }}><Copy size={13} /> Copy</button>
+          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="modular-btn" style={{ padding: '4px 8px' }}>More <ChevronDown size={12} style={{ opacity: 0.6 }} /></button>
           
           {dropdownOpen && (
             <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', zIndex: 100, display: 'flex', flexDirection: 'column', width: '140px', boxShadow: 'var(--shadow-lg)' }}>

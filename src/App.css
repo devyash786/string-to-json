@@ -214,15 +214,45 @@ body, html {
   font-weight: 500;
 }
 
-.tab-btn.active {
-  background: var(--accent-primary);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 0 20px var(--accent-glow);
+.modular-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.tab-btn.outline {
-  border-style: dashed;
+.modular-btn:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+}
+
+.icon-btn-round {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn-round:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
 }
 
 .main-content {
@@ -248,12 +278,38 @@ body, html {
   border: 1px solid var(--border-color);
 }
 
-.editor-container {
-  flex: 1;
-  position: relative;
-  min-height: 500px; /* Guarantee Monaco height calculation is not 0 */
+.modular-selector {
   display: flex;
-  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.modular-selector-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+}
+
+.modular-selector-btn:hover {
+  color: var(--text-primary);
+}
+
+.modular-selector-btn.active {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 /* Toolbars */
