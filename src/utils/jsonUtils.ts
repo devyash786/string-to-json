@@ -13,14 +13,38 @@ export interface JsonStats {
 export const formatOrRepairJson = (input: string, space = 2): { result: string; fixed: boolean; error: string | null } => {
   if (!input.trim()) return { result: '', fixed: false, error: null };
 
+  let processedString = input.trim();
+  let wasEscaped = false;
+
+  // Extremely robust double-unescaping
+  if (
+    (processedString.startsWith('"') && processedString.endsWith('"')) ||
+    (processedString.startsWith("'") && processedString.endsWith("'"))
+  ) {
+    try {
+      const unescaped = JSON.parse(processedString);
+      if (typeof unescaped === 'string') {
+        processedString = unescaped;
+        wasEscaped = true;
+      }
+    } catch (e) {
+      processedString = processedString
+        .replace(/^['"](.*)['"]$/, '$1')
+        .replace(/\\\\/g, '\\')
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'");
+      wasEscaped = true;
+    }
+  }
+
   try {
     // Attempt standard parse first for valid JSON
-    const parsed = JSON.parse(input);
-    return { result: JSON.stringify(parsed, null, space), fixed: false, error: null };
+    const parsed = JSON.parse(processedString);
+    return { result: JSON.stringify(parsed, null, space), fixed: wasEscaped, error: null };
   } catch (initialErr: any) {
     try {
       // Attempt repair (handles single quotes, trailing commas, None->null, True->true, etc.)
-      const repaired = jsonrepair(input);
+      const repaired = jsonrepair(processedString);
       const parsed = JSON.parse(repaired);
       return { result: JSON.stringify(parsed, null, space), fixed: true, error: null };
     } catch (repairErr: any) {

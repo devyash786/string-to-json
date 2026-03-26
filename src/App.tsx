@@ -290,7 +290,7 @@ function App() {
                     value={inputData}
                     onChange={(val) => setInputData(val || '')}
                     theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                    options={{ minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: true, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
+                    options={{ minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: false, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
                   />
                 </div>
               </div>
@@ -325,7 +325,7 @@ function App() {
                       language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
                       value={outputData}
                       theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                      options={{ readOnly: true, minimap: { enabled: false }, wordWrap: 'on', scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
+                      options={{ readOnly: true, minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: false, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
                     />
                   )}
                 </div>
