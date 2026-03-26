@@ -3,13 +3,13 @@ import {
   Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle,
   Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import { DiffEditor } from '@monaco-editor/react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
 
 import './App.css';
 import { JsonEditor } from './components/JsonEditor';
 import { OutputViewer } from './components/OutputViewer';
+import { DiffViewer } from './components/DiffViewer';
 
 type Mode = 'formatter' | 'diff' | 'yaml' | 'csv' | 'ts';
 type ThemeType = 'theme-midnight' | 'theme-ocean' | 'theme-forest' | 'theme-rose' | 'theme-netflix' | 'theme-light';
@@ -197,24 +197,14 @@ function App() {
       <main className="main-content">
         <div className="workspace-card">
           {mode === 'diff' ? (
-            <div className="diff-layout-container" style={{ width: '100%', height: '100%' }}>
-              <div className="diff-toolbars">
-                <div className="pane-toolbar" style={{flex: 1}}><span className="toolbar-title">Original JSON</span></div>
-                <div className="pane-toolbar" style={{flex: 1}}><span className="toolbar-title">Modified JSON</span></div>
-              </div>
-              <DiffEditor
-                height="65vh"
-                language="json"
-                theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                original={diffOriginal}
-                modified={inputData}
-                options={{ renderSideBySide: true, minimap: { enabled: false }, originalEditable: true }}
-                onMount={(editor) => {
-                  editor.getOriginalEditor().onDidChangeModelContent(() => setDiffOriginal(editor.getOriginalEditor().getValue()));
-                  editor.getModifiedEditor().onDidChangeModelContent(() => setInputData(editor.getModifiedEditor().getValue()));
-                }}
-              />
-            </div>
+            <DiffViewer
+              theme={theme}
+              initialOriginal={diffOriginal}
+              initialModified={inputData}
+              onOriginalChange={setDiffOriginal}
+              onModifiedChange={setInputData}
+              onToast={showToast}
+            />
           ) : (
             <div className="split-layout">
               <JsonEditor
