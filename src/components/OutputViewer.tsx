@@ -53,10 +53,29 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
           <button onClick={() => setDropdownOpen(!dropdownOpen)} className="modular-btn" style={{ padding: '4px 8px' }}>More <ChevronDown size={12} style={{ opacity: 0.6 }} /></button>
           
           {dropdownOpen && (
-            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', zIndex: 100, display: 'flex', flexDirection: 'column', width: '140px', boxShadow: 'var(--shadow-lg)' }}>
-              <button onClick={() => { onCopyFormatted(); setDropdownOpen(false); }} className="dropdown-menu-item" style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}>Beautify & Copy</button>
-              <button onClick={() => { onCopyMinified(); setDropdownOpen(false); }} className="dropdown-menu-item" style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}>Minify & Copy</button>
-              <button onClick={() => { onCopyJS(); setDropdownOpen(false); }} className="dropdown-menu-item" style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }} title="Copies output as a JS object literal">Copy as JS</button>
+            <div className="theme-dropdown" style={{ top: '100%', right: 0, marginTop: '8px', width: '160px' }}>
+              <button 
+                onClick={() => { onCopyFormatted(); setDropdownOpen(false); }} 
+                className="theme-dropdown-item" 
+                style={{ borderBottom: '1px solid var(--border-color)', borderRadius: '8px 8px 0 0' }}
+              >
+                Beautify & Copy
+              </button>
+              <button 
+                onClick={() => { onCopyMinified(); setDropdownOpen(false); }} 
+                className="theme-dropdown-item" 
+                style={{ borderBottom: '1px solid var(--border-color)', borderRadius: 0 }}
+              >
+                Minify & Copy
+              </button>
+              <button 
+                onClick={() => { onCopyJS(); setDropdownOpen(false); }} 
+                className="theme-dropdown-item" 
+                style={{ borderRadius: '0 0 8px 8px' }}
+                title="Copies output as a JS object literal"
+              >
+                Copy as JS
+              </button>
             </div>
           )}
         </div>

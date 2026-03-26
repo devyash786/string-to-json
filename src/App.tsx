@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Braces, CheckCircle2, AlertCircle,
-  UploadCloud, Sun, Moon, Zap, ShieldCheck, BrainCircuit
+  UploadCloud, Palette, Zap, ShieldCheck, BrainCircuit
 } from 'lucide-react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
@@ -34,8 +34,10 @@ function App() {
   const [errorCol, setErrorCol] = useState<number | null>(null);
   const [stats, setStats] = useState({ sizeKB: '0', keysCount: 0, maxDepth: 0 });
   const [activeSample, setActiveSample] = useState<string | null>(null);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.className = theme;
@@ -207,13 +209,44 @@ function App() {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     document.body.style.cursor = 'col-resize';
+    const handleClickOutside = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setThemeMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <div className="app-container" onDrop={(e) => { e.preventDefault(); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }} onDragOver={(e) => e.preventDefault()}>
-      <button className="theme-toggle-ghost" onClick={() => setTheme(theme === 'theme-light' ? 'theme-midnight' : 'theme-light')} title="Toggle Theme">
-        {theme === 'theme-light' ? <Moon size={18} /> : <Sun size={18} />}
-      </button>
+      <div className="theme-selector-container" ref={themeMenuRef}>
+        <button className="theme-toggle-btn" onClick={() => setThemeMenuOpen(!themeMenuOpen)}>
+          <Palette size={16} /> Theme
+        </button>
+        {themeMenuOpen && (
+          <div className="theme-dropdown">
+            <button onClick={() => { setTheme('theme-midnight'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-midnight' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#09090b' }}></div> Midnight
+            </button>
+            <button onClick={() => { setTheme('theme-ocean'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-ocean' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#020617' }}></div> Ocean Blue
+            </button>
+            <button onClick={() => { setTheme('theme-forest'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-forest' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#022c22' }}></div> Forest Green
+            </button>
+            <button onClick={() => { setTheme('theme-rose'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-rose' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#4c0519' }}></div> Rose Pink
+            </button>
+            <button onClick={() => { setTheme('theme-light'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-light' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#f8fafc' }}></div> Clean Light
+            </button>
+            <button onClick={() => { setTheme('theme-netflix'); setThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === 'theme-netflix' ? 'active' : ''}`}>
+              <div className="theme-color-dot" style={{ backgroundColor: '#000000' }}></div> Netflix Red
+            </button>
+          </div>
+        )}
+      </div>
 
       <header className="header" style={{ textAlign: 'center', marginBottom: '0.5rem', paddingTop: '0.5rem' }}>
         <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.2rem', fontWeight: 700 }}>
