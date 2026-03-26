@@ -14,7 +14,6 @@ interface OutputViewerProps {
   onFix: () => void;
   onCopyFormatted: () => void;
   onCopyMinified: () => void;
-  onCopyEscaped: () => void;
 }
 
 export const OutputViewer: React.FC<OutputViewerProps> = ({
@@ -27,17 +26,15 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
   errorCol,
   onFix,
   onCopyFormatted,
-  onCopyMinified,
-  onCopyEscaped
+  onCopyMinified
 }) => {
   return (
     <div className="pane-wrapper">
       <div className="pane-toolbar">
-        <span className="toolbar-title">{mode === 'formatter' ? 'Fixed & Formatted Output' : `${mode.toUpperCase()} Output`}</span>
+        <span className="toolbar-title">{mode === 'formatter' ? 'Fixed JSON' : `${mode.toUpperCase()} Output`}</span>
         <div className="toolbar-actions">
-          <button onClick={onCopyFormatted} className="tool-btn" title="Copy Formatted JSON"><Copy size={14} /> Formatted</button>
-          <button onClick={onCopyMinified} className="tool-btn" title="Copy Minified (1 Line)"><Copy size={14} /> Minified</button>
-          <button onClick={onCopyEscaped} className="tool-btn" title="Copy Escaped String"><Copy size={14} /> Escaped</button>
+          <button onClick={onCopyFormatted} className="tool-btn" title="Copy Formatted JSON"><Copy size={14} /> Beautify & Copy</button>
+          <button onClick={onCopyMinified} className="tool-btn" title="Copy Minified (1 Line)"><Copy size={14} /> Minify & Copy</button>
         </div>
       </div>
       

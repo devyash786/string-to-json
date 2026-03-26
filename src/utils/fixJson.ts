@@ -37,6 +37,20 @@ export const fixJson = (input: string): FixResult => {
       JSON.parse(repaired);
       return { repaired, isFixed: true, error: null, line: null, col: null };
     } catch (err: any) {
+      
+      // If jsonrepair ALSO fails, try extracting a JSON payload out of a noisy log string!
+      try {
+        const logMatch = processedInput.match(/([\{\[].*[\}\]])/s);
+        if (logMatch && logMatch[1]) {
+          const extracted = logMatch[1];
+          const repairedExtract = jsonrepair(extracted);
+          JSON.parse(repairedExtract); // Validate
+          return { repaired: repairedExtract, isFixed: true, error: null, line: null, col: null };
+        }
+      } catch (extractErr) {
+        // Allow fallback to exact error message below
+      }
+
       // Extract exact line/col from jsonrepair error
       const msg = err.message || 'Irreparable syntax error';
       const match = msg.match(/line (\d+), column (\d+)/);

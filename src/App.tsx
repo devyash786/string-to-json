@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle,
-  Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, ToggleLeft, ToggleRight
+  Palette, UploadCloud, SplitSquareHorizontal
 } from 'lucide-react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
@@ -29,8 +29,7 @@ function App() {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // New toggle state
-  const [autoFormat, setAutoFormat] = useState(true);
+  const autoFormat = true; // Always on for seamless UX
 
   // Editor State
   const [inputData, setInputData] = useState<string>('');
@@ -136,18 +135,17 @@ function App() {
 
   return (
     <div className="app-container" onDrop={(e) => { e.preventDefault(); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }} onDragOver={(e) => e.preventDefault()}>
-      <header className="header">
-        <h1>
-          <Braces size={36} color="var(--accent-primary)" />
-          JSON Debugger & Fixer
+      <header className="header" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.5rem', fontWeight: 800 }}>
+          <Braces size={40} color="var(--accent-primary)" />
+          Fix Broken JSON in 1 Click
         </h1>
-        <p>Fix messy API JSON instantly. Debug broken JSON in seconds.</p>
+        <p style={{ fontSize: '1.1rem', opacity: 0.8, marginTop: '0.6rem' }}>Parse escaped strings, logs, and API payloads instantly — 100% client-side & private.</p>
         
-        <div className="security-banner">
-          <div className="security-item">
-            <ShieldCheck size={18} className="text-success" />
-            <span><strong>Zero Data Leakage:</strong> Processing happens 100% locally. No network requests are made.</span>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '1.2rem' }}>
+          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>⚡ Instant</span>
+          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>🔒 Private</span>
+          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>🧠 Smart Parsing</span>
         </div>
 
         <div className="theme-selector-container" ref={menuRef}>
@@ -182,14 +180,15 @@ function App() {
         </button>
         <div style={{flex: 1}}></div>
 
-        {/* Auto Format Toggle */}
-        <button className={`tab-btn ${autoFormat ? 'active' : ''}`} onClick={() => { setAutoFormat(!autoFormat); !autoFormat && processInput(); }}>
-          {autoFormat ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-          Auto Format
-        </button>
+        <div className="sample-data-chips">
+          <span style={{ fontSize: '0.8rem', opacity: 0.6, fontWeight: 600 }}>Action:</span>
+          <button className="chip" onClick={() => setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"')}>Try Escaped</button>
+          <button className="chip" onClick={() => setInputData("{'name': 'Dev', active: True, val: None,}")}>Try Broken</button>
+          <button className="chip" onClick={() => setInputData("2026-03-26 10:15:30 [INFO] Payload received: {\"status\": 200, \"data\": [1,2,3]}")}>Try Log Payload</button>
+        </div>
 
         <button className="tab-btn outline" onClick={() => fileInputRef.current?.click()}>
-          <UploadCloud size={18} /> Upload JSON File
+          <UploadCloud size={18} /> Upload JSON
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
         </button>
       </div>
@@ -225,19 +224,22 @@ function App() {
                 onFix={forceAutoRepair}
                 onCopyFormatted={() => copyOut('formatted')}
                 onCopyMinified={() => copyOut('minified')}
-                onCopyEscaped={() => copyOut('escaped')}
               />
             </div>
           )}
         </div>
 
-        <div className="stats-footer">
+        <div className="stats-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }}>
            <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Repaired JSON' : 'Syntax Error'}</div>
            <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
            <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
            <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
         </div>
       </main>
+
+      <footer style={{ textAlign: 'center', padding: '1.5rem', opacity: 0.5, fontSize: '0.85rem' }}>
+        Built for developers who hate messy JSON
+      </footer>
 
       {toast && (
         <div className="toast">

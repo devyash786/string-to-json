@@ -37,7 +37,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
   return (
     <div className="pane-wrapper">
       <div className="pane-toolbar">
-        <span className="toolbar-title">Input JSON</span>
+        <span className="toolbar-title">Original Input</span>
         <div className="toolbar-actions">
           <button onClick={() => setShowSearch(!showSearch)} className={`tool-btn ${showSearch ? 'active' : ''}`}><SearchIcon size={14} /> Search</button>
           <button onClick={onClear} className="tool-btn"><Trash2 size={14} /> Clear</button>

@@ -105,6 +105,29 @@ body {
 }
 
 /* Workspace & Tabs */
+.sample-data-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1rem;
+}
+
+.chip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chip:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: transparent;
+}
 .mode-tabs {
   display: flex;
   justify-content: center;
