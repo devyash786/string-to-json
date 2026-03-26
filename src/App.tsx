@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Braces, CheckCircle2, AlertCircle,
-  UploadCloud, Palette, Zap, Search
+  UploadCloud, Palette, Zap, Search, ShieldCheck
 } from 'lucide-react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
@@ -254,8 +254,13 @@ function App() {
           Fix Broken JSON
         </h1>
         <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: '520px', margin: '0.6rem auto 0', lineHeight: 1.4, opacity: 0.8 }}>
-          Turn escaped strings & broken payloads into perfect JSON instantly.
+          Because backslashes are JSON's way of crying for help.
         </p>
+        <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+          <div className="stat-card" style={{ background: 'rgba(52, 211, 153, 0.05)', borderColor: 'rgba(52, 211, 153, 0.2)', color: 'var(--success-color)' }}>
+            <ShieldCheck size={12} /> 100% Data Privacy
+          </div>
+        </div>
 
         <div className="segmented-control">
           {[
@@ -378,6 +383,9 @@ function App() {
         </div>
 
       <footer className="stats-footer">
+        <div className="stat-card" style={{ color: 'var(--success-color)', background: 'rgba(52, 211, 153, 0.05)' }}>
+          <ShieldCheck size={12}/> 100% Private
+        </div>
         <div className="stat-card">
           <span className={`status-dot ${status}`}></span> 
           {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid' : 'Fixed'}

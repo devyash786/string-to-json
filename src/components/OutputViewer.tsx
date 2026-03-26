@@ -49,8 +49,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
           <span className="sub-label" style={{ marginLeft: '8px' }}>Parsed result</span>
         </div>
         <div className="toolbar-actions" style={{ position: 'relative' }} ref={dropdownRef}>
-          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }}><Copy size={13} /> Copy</button>
-          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="modular-btn" style={{ padding: '4px 8px' }}>More <ChevronDown size={12} style={{ opacity: 0.6 }} /></button>
+          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }} title="Copy as formatted JSON"><Copy size={13} /> COPY</button>
+          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="modular-btn" style={{ padding: '4px 8px' }} title="Show more options"><ChevronDown size={14} style={{ opacity: 0.8 }} /></button>
           
           {dropdownOpen && (
             <div className="theme-dropdown" style={{ top: '100%', right: 0, marginTop: '8px', width: '160px' }}>
