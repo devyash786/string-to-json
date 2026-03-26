@@ -83,9 +83,9 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         </div>
       </div>
       
-      <div style={{ flex: 1, minHeight: '600px' }}>
+      <div style={{ flex: 1, minHeight: '50vh' }}>
         <DiffEditor
-          height="65vh"
+          height="55vh"
           language="json"
           theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
           original={initialOriginal}

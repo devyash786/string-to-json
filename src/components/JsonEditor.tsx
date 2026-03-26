@@ -45,14 +45,13 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
         </div>
       </div>
       
-      {showSearch && (
-        <SearchBar onSearch={handleSearch} onNext={handleNextMatch} onPrev={handlePrevMatch} isActive={showSearch} />
-      )}
-
-      <div className="editor-container" style={{ minHeight: '500px' }}>
+      <div style={{ flex: 1, position: 'relative', minHeight: '50vh' }}>
+        {showSearch && (
+          <SearchBar onSearch={handleSearch} onNext={handleNextMatch} onPrev={handlePrevMatch} isActive={showSearch} />
+        )}
         <Editor
-          height="65vh"
-          defaultLanguage="json"
+          height="55vh"
+          language="json"
           value={value}
           onChange={(val) => onChange(val || '')}
           theme={theme === 'theme-light' ? 'light' : 'vs-dark'}

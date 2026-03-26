@@ -271,17 +271,18 @@ function App() {
           )}
         </div>
 
-        <div className="stats-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }}>
-           <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Repaired JSON' : 'Syntax Error'}</div>
-           <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
-           <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
-           <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
+        <div className="stats-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+             <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Fixed' : 'Error'}</div>
+             <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
+             <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
+             <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
+           </div>
+           <div style={{ opacity: 0.5, fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 500 }}>
+             Built for developers who hate messy JSON
+           </div>
         </div>
       </main>
-
-      <footer style={{ textAlign: 'center', padding: '1.5rem', opacity: 0.5, fontSize: '0.85rem' }}>
-        Built for developers who hate messy JSON
-      </footer>
 
       {toast && (
         <div className="toast">
