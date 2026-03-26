@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Clipboard, ChevronDown } from 'lucide-react';
+import { Clipboard, ChevronDown, Search as SearchIcon } from 'lucide-react';
 import { ErrorDisplay } from './ErrorDisplay';
 
 interface OutputViewerProps {
@@ -32,6 +32,18 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<any>(null);
+
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
+
+  const handleToggleSearch = () => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      editorRef.current.trigger('keyboard', 'actions.find', null);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -49,14 +61,14 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
           <span className="sub-label" style={{ marginLeft: '8px' }}>Parsed result</span>
         </div>
         <div className="toolbar-actions" style={{ position: 'relative', display: 'flex', gap: '4px' }} ref={dropdownRef}>
-          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent', display: 'flex', alignItems: 'center', gap: '6px' }} title="Copy as formatted JSON">
+          <button onClick={handleToggleSearch} className="modular-btn" style={{ padding: '6px' }} title="Search (Cmd+F)"><SearchIcon size={14} /></button>
+          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '6px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }} title="Copy as formatted JSON">
             <Clipboard size={14} /> 
-            <span style={{ fontSize: '11px', fontWeight: 700 }}>COPY</span>
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }} 
             className={`modular-btn ${dropdownOpen ? 'active' : ''}`} 
-            style={{ padding: '4px', width: '30px', justifyContent: 'center' }} 
+            style={{ padding: '6px', width: '32px', justifyContent: 'center' }} 
             title="Show more options"
           >
             <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: dropdownOpen ? 'rotate(180deg)' : 'none' }} />
@@ -105,11 +117,11 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
             language={mode === 'ts' ? 'typescript' : mode === 'yaml' ? 'yaml' : mode === 'csv' ? 'text' : 'json'}
             value={value}
             theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
+            onMount={handleEditorDidMount}
             options={{
               readOnly: true,
               minimap: { enabled: true },
               wordWrap: 'on',
-              formatOnPaste: true,
               scrollBeyondLastLine: false,
               padding: { top: 16 }
             }}
