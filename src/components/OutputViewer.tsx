@@ -43,15 +43,14 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
 
   return (
     <div className="pane-wrapper">
-      <div className="toolbar small">
-        <span className="toolbar-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {mode === 'formatter' ? 'Fixed JSON' : `${mode.toUpperCase()} Output`}
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>Parsed result</span>
-        </span>
+      <div className="toolbar small" style={{ borderBottom: '1px solid var(--border-color)', padding: '8px 16px', backgroundColor: 'var(--bg-main)' }}>
+        <div className="toolbar-title" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: 0 }}>
+          <strong>Fixed JSON</strong>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>Parsed result</span>
+        </div>
         <div className="toolbar-actions" style={{ position: 'relative' }} ref={dropdownRef}>
-          <button onClick={onCopyFormatted} className="tool-btn primary" title="Copy Output" style={{ backgroundColor: 'var(--accent-primary)', color: 'white' }}><Copy size={14} /> Copy</button>
-          
-          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="select-dropdown" style={{ padding: '4px 8px' }}>More...</button>
+          <button onClick={onCopyFormatted} className="tool-btn primary" title="Copy Output" style={{ backgroundColor: 'var(--accent-primary)', color: 'white', borderRadius: '4px', border: 'none', padding: '4px 12px', fontSize: '12px' }}><Copy size={14} /> Copy</button>
+          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="select-dropdown" style={{ padding: '4px 8px', fontSize: '12px' }}>More...</button>
           
           {dropdownOpen && (
             <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', zIndex: 100, display: 'flex', flexDirection: 'column', width: '140px', boxShadow: 'var(--shadow-lg)' }}>
@@ -64,6 +63,11 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
       </div>
       
       <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        {!value && (
+          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', pointerEvents: 'none', zIndex: 1 }}>
+            Your fixed JSON will appear here
+          </div>
+        )}
         {status === 'error' ? (
           <ErrorDisplay message={errorMsg} line={errorLine} col={errorCol} onFix={onFix} />
         ) : (

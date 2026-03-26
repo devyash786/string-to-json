@@ -102,8 +102,20 @@ function App() {
         setOutputData(JSON.stringify(parsed, null, 2));
       }
 
-      setStatus(fixed.isFixed ? 'fixing' : 'success');
-      setErrorMsg(null);
+      if (fixed.isFixed) {
+        setStatus('fixing');
+        setErrorMsg(null);
+        if (activeSuggestion?.includes('Escaped')) {
+           setSuggestion('Fixed: unescaped nested strings \u00B7 removed 1 layer of encoding');
+        } else if (activeSuggestion?.includes('Broken')) {
+           setSuggestion('Fixed: repaired syntax errors \u00B7 standardized keys & values');
+        }
+      } else {
+        setStatus('success');
+        setErrorMsg(null);
+        setSuggestion('Valid JSON \u2014 no fixes needed \u2728');
+      }
+      
       setErrorLine(null);
       setErrorCol(null);
       
@@ -116,7 +128,12 @@ function App() {
   }, [inputData, mode]);
 
   useEffect(() => {
-    if (autoFormat) processInput();
+    if (autoFormat) {
+      const timer = setTimeout(() => {
+        processInput();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
   }, [inputData, mode, autoFormat]);
 
   const forceAutoRepair = () => {
@@ -136,6 +153,18 @@ function App() {
       showToast(`Loaded ${file.name}`, 'success');
     }
   };
+
+  // Shortcut Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        processInput();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [processInput]);
 
   const copyOut = (format: 'formatted' | 'minified' | 'escaped' | 'js') => {
     if (!outputData) return;
@@ -232,8 +261,19 @@ function App() {
 
         <div className="workspace-card">
           {suggestion && (
-            <div style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <BrainCircuit size={14} color="var(--accent-primary)" /> {suggestion}
+            <div style={{ 
+              backgroundColor: status === 'success' ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-hover)', 
+              color: status === 'success' ? 'var(--text-success)' : 'var(--text-muted)', 
+              borderBottom: '1px solid var(--border-color)', 
+              padding: '0.6rem 1rem', 
+              fontSize: '13px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem', 
+              fontWeight: 500 
+            }}>
+              {status === 'success' ? <Zap size={14} color="var(--text-success)" /> : <BrainCircuit size={14} color="var(--accent-primary)" strokeWidth={2.5} />}
+              {suggestion}
             </div>
           )}
 

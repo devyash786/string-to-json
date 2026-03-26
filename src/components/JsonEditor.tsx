@@ -37,15 +37,26 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
   return (
     <div className="pane-wrapper">
       <div className="pane-toolbar">
-        <span className="toolbar-title">Original Input</span>
+        <div className="toolbar-title" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <strong>Original input</strong>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>Paste your escaped string</span>
+        </div>
         <div className="toolbar-actions">
-          <button onClick={() => setShowSearch(!showSearch)} className={`tool-btn ${showSearch ? 'active' : ''}`}><SearchIcon size={14} /> Search</button>
-          <button onClick={onClear} className="tool-btn"><Trash2 size={14} /> Clear</button>
-          <button onClick={onCopy} className="tool-btn"><Copy size={14} /> Copy</button>
+          <button onClick={() => setShowSearch(!showSearch)} className={`tool-btn ${showSearch ? 'active' : ''}`} title="Search (Cmd+F)"><SearchIcon size={14} /> Search</button>
+          <button onClick={onClear} className="tool-btn" title="Clear All Text"><Trash2 size={14} /> Clear</button>
+          <button onClick={onCopy} className="tool-btn" title="Copy Input Source"><Copy size={14} /> Copy</button>
         </div>
       </div>
       
       <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        {value === '' && (
+          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'pre' }}>
+            {'"{\\"name\\":\\"Yash\\",\\"role\\":\\"developer\\"}"'}
+          </div>
+        )}
+        <div style={{ position: 'absolute', bottom: '12px', left: '16px', fontSize: '11px', color: 'var(--text-muted)', zIndex: 5, pointerEvents: 'none', opacity: 0.6 }}>
+          ⌘ Enter to parse
+        </div>
         {showSearch && (
           <SearchBar onSearch={handleSearch} onNext={handleNextMatch} onPrev={handlePrevMatch} isActive={showSearch} />
         )}

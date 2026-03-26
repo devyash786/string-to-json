@@ -319,6 +319,14 @@ body, html {
   border-right: none;
 }
 
+.dropdown-menu-item {
+  transition: background 0.2s;
+}
+
+.dropdown-menu-item:hover {
+  background-color: var(--bg-hover) !important;
+}
+
 /* Editor Panes */
 .pane-wrapper {
   flex: 1;
