@@ -189,23 +189,41 @@ body {
   overflow: hidden;
 }
 
-.diff-layout {
+.diff-layout-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
 }
 
-.pane-toolbar {
+.diff-toolbars {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.4rem 1rem;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.8rem;
+  width: 100%;
+}
+
+.branding-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.branding-subtitle {
+  font-size: 0.65rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.error-text-highlight {
+  font-family: var(--font-mono);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 0.75rem;
+  border-radius: 4px;
+  color: #fca5a5;
+  font-weight: 500;
+  margin-top: 1rem;
 }
 
 .toolbar-actions {

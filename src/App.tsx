@@ -20,7 +20,6 @@ const THEMES = [
 ] as const;
 
 function App() {
-  // Global State
   const [theme, setTheme] = useState<ThemeType>('theme-midnight');
   const [mode, setMode] = useState<Mode>('formatter');
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
@@ -28,9 +27,8 @@ function App() {
 
   // Editor State
   const [inputData, setInputData] = useState<string>('');
-  const [diffOriginal] = useState<string>('{\n  "paste_original_here": true\n}');
+  const [diffOriginal, setDiffOriginal] = useState<string>('{\n  "paste_original_here": true\n}');
   const [outputData, setOutputData] = useState<string>('');
-  const [autoFormat, setAutoFormat] = useState(true);
   
   // Status and Stats
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'fixing'>('idle');
@@ -38,13 +36,22 @@ function App() {
   const [stats, setStats] = useState({ sizeKB: '0', keysCount: 0, maxDepth: 0 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Update Theme
   useEffect(() => {
     document.body.className = theme;
   }, [theme]);
 
-  // Toast Cleanup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsThemeMenuOpen(false);
+      }
+    };
+    if (isThemeMenuOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isThemeMenuOpen]);
+
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => setToast(null), 3000);
@@ -54,23 +61,10 @@ function App() {
 
   const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
 
-  // Handle URL Sync (Base64) - Load initially
-  useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      try {
-        const decoded = decodeURIComponent(atob(hash));
-        setInputData(decoded);
-      } catch (e) {
-        console.error('Invalid URL Hash');
-      }
-    }
-  }, []);
-
   // Sync back to URL (debounced)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputData.length > 0 && inputData.length < 500000) { // Limit to 500kb approx
+      if (inputData.length > 0 && inputData.length < 500000) {
         window.history.replaceState(null, '', `#${btoa(encodeURIComponent(inputData))}`);
       } else {
         window.history.replaceState(null, '', window.location.pathname);
@@ -93,9 +87,6 @@ function App() {
         if (error) throw new Error(error);
         
         setOutputData(result);
-        if (autoFormat && result !== inputData && !fixed) {
-           // We might not want to auto-replace input unless asked, but output gets formatted
-        }
         setStatus(fixed ? 'fixing' : 'success');
         setErrorMsg('');
       } else if (mode === 'yaml') {
@@ -109,20 +100,18 @@ function App() {
         setStatus('success');
       }
       
-      // Update Stats
       setStats(getJsonStats(inputData));
     } catch (err: any) {
       setOutputData('');
       setStatus('error');
       setErrorMsg(err.message || 'Syntax Error near input');
     }
-  }, [inputData, mode, autoFormat]);
+  }, [inputData, mode]);
 
   useEffect(() => {
     processInput();
   }, [processInput]);
 
-  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey)) {
@@ -132,8 +121,7 @@ function App() {
         } else if (e.key === 'm') {
           e.preventDefault();
           try {
-            const minified = JSON.stringify(JSON.parse(inputData));
-            setInputData(minified);
+            setInputData(JSON.stringify(JSON.parse(inputData)));
             showToast('Minified JSON', 'success');
           } catch(e) {}
         }
@@ -143,7 +131,6 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [inputData, processInput]);
 
-  // Drag and drop Handler
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -170,30 +157,48 @@ function App() {
     showToast('Copied to clipboard', 'success');
   };
 
+  const copyFormatted = () => {
+    navigator.clipboard.writeText(outputData);
+    showToast('Copied Formatted', 'success');
+  };
+
+  const copyMinified = () => {
+    try {
+      const mini = JSON.stringify(JSON.parse(outputData));
+      navigator.clipboard.writeText(mini);
+      showToast('Copied Minified', 'success');
+    } catch (e) {
+      navigator.clipboard.writeText(outputData.replace(/\s+/g, ''));
+      showToast('Copied Minified Space', 'success');
+    }
+  };
+
+  const copyEscaped = () => {
+    const escaped = JSON.stringify(outputData);
+    navigator.clipboard.writeText(escaped);
+    showToast('Copied Escaped', 'success');
+  };
+
   return (
     <div 
       className="ide-container"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
-      {/* IDE Header */}
       <header className="ide-header">
         <div className="branding">
           <Braces className="brand-icon" size={24} />
-          <h1>Developer JSON Tools</h1>
+          <div className="branding-titles">
+            <h1>JSON Debugger & Fixer</h1>
+            <p className="branding-subtitle">Fix messy API JSON instantly. Debug broken JSON in seconds.</p>
+          </div>
           <div className="privacy-badge-sm">
             <ShieldCheck size={14} /> 100% Client-Side
           </div>
         </div>
 
         <div className="header-actions">
-           <label className="toggle-switch">
-             <input type="checkbox" checked={autoFormat} onChange={e => setAutoFormat(e.target.checked)} />
-             <span className="slider"></span>
-             <span className="label-text">Auto Format</span>
-           </label>
-
-           <div className="theme-selector-container">
+           <div className="theme-selector-container" ref={menuRef}>
             <button className="icon-button" onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}>
               <Palette size={18} />
             </button>
@@ -211,14 +216,12 @@ function App() {
         </div>
       </header>
 
-      {/* Main Workspace */}
       <div className="ide-workspace">
-        {/* Activity Bar (Sidebar) */}
         <aside className="activity-bar">
-          <button className={`nav-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')} title="Formatter & Repair">
+          <button className={`nav-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')} title="Formatter & Messy JSON Fixer">
             <FileJson size={24} />
           </button>
-          <button className={`nav-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')} title="JSON Diff">
+          <button className={`nav-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')} title="JSON Diff Compare">
             <SplitSquareHorizontal size={24} />
           </button>
           <button className={`nav-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')} title="JSON to YAML">
@@ -237,24 +240,39 @@ function App() {
           </button>
         </aside>
 
-        {/* Editor Area */}
         <main className="editor-area">
           {mode === 'diff' ? (
-            <div className="diff-layout">
+            <div className="diff-layout-container">
+               <div className="diff-toolbars">
+                  <div className="pane-toolbar" style={{flex: 1}}>
+                    <span>Original JSON</span>
+                  </div>
+                  <div className="pane-toolbar" style={{flex: 1}}>
+                    <span>Modified JSON</span>
+                  </div>
+               </div>
               <DiffEditor
-                height="100%"
+                height="calc(100% - 32px)"
                 language="json"
                 theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
                 original={diffOriginal}
                 modified={inputData}
-                options={{ renderSideBySide: true, minimap: { enabled: false } }}
+                options={{ renderSideBySide: true, minimap: { enabled: false }, originalEditable: true }}
+                onMount={(editor) => {
+                  editor.getOriginalEditor().onDidChangeModelContent(() => {
+                    setDiffOriginal(editor.getOriginalEditor().getValue());
+                  });
+                  editor.getModifiedEditor().onDidChangeModelContent(() => {
+                    setInputData(editor.getModifiedEditor().getValue());
+                  });
+                }}
               />
             </div>
           ) : (
             <div className="split-layout">
               <div className="pane-wrapper">
                 <div className="pane-toolbar">
-                  <span>Input JSON</span>
+                  <span>Input JSON (Cmd+F to Search)</span>
                   <div className="toolbar-actions">
                     <button onClick={() => setInputData('')} className="tool-btn"><Trash2 size={14} /> Clear</button>
                     <button onClick={() => handleCopy(inputData)} className="tool-btn"><Copy size={14} /> Copy</button>
@@ -272,20 +290,25 @@ function App() {
 
               <div className="pane-wrapper">
                 <div className="pane-toolbar">
-                  <span>{mode === 'formatter' ? 'Formatted Output' : `${mode.toUpperCase()} Output`}</span>
+                  <span>{mode === 'formatter' ? 'Fixed & Formatted Output' : `${mode.toUpperCase()} Output`}</span>
                   <div className="toolbar-actions">
-                    <button onClick={() => handleCopy(outputData)} className="tool-btn"><Copy size={14} /> Copy</button>
+                    <button onClick={copyFormatted} className="tool-btn" title="Copy Formatted JSON"><Copy size={14} /> Formatted</button>
+                    <button onClick={copyMinified} className="tool-btn" title="Copy Minified (1 Line)"><Copy size={14} /> Minified</button>
+                    <button onClick={copyEscaped} className="tool-btn" title="Copy Escaped String"><Copy size={14} /> Escaped</button>
                   </div>
                 </div>
                 {status === 'error' ? (
                   <div className="error-display">
-                    <Bug size={32} />
-                    <h3>Parse Error</h3>
-                    <p>{errorMsg}</p>
+                    <Bug size={36} />
+                    <h3>❌ Parse Error Detected</h3>
+                    <p className="error-text-highlight">{errorMsg}</p>
                     <button className="repair-btn" onClick={() => {
                         const repaired = formatOrRepairJson(inputData, 2);
                         if (repaired.fixed) setInputData(repaired.result);
-                    }}>Attempt Auto-Repair</button>
+                    }}>Force Auto-Repair Messy JSON</button>
+                    <p style={{fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem'}}>
+                      Fixes single quotes, True/False, None, and trailing commas.
+                    </p>
                   </div>
                 ) : (
                   <Editor
@@ -302,7 +325,6 @@ function App() {
         </main>
       </div>
 
-      {/* StatusBar */}
       <footer className="ide-statusbar">
         <div className="status-left">
           <span className={`status-dot ${status}`}></span>
@@ -318,6 +340,7 @@ function App() {
           <span>{stats.keysCount} Keys</span>
           <span>Depth: {stats.maxDepth}</span>
           <span>[Cmd+Enter] Format</span>
+          <span>[Cmd+M] Minify</span>
         </div>
       </footer>
 
