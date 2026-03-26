@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle, Copy, Trash2,
-  Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, Bug, FileSpreadsheet
+  Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, Bug
 } from 'lucide-react';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { formatOrRepairJson, convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
@@ -61,7 +61,7 @@ function App() {
 
   const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
 
-  // Sync back to URL (debounced)
+  // Sync back to URL
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputData.length > 0 && inputData.length < 500000) {
@@ -181,78 +181,83 @@ function App() {
 
   return (
     <div 
-      className="ide-container"
+      className="app-container"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
-      <header className="ide-header">
-        <div className="branding">
-          <Braces className="brand-icon" size={24} />
-          <div className="branding-titles">
-            <h1>JSON Debugger & Fixer</h1>
-            <p className="branding-subtitle">Fix messy API JSON instantly. Debug broken JSON in seconds.</p>
-          </div>
-          <div className="privacy-badge-sm">
-            <ShieldCheck size={14} /> 100% Client-Side
+      <header className="header">
+        <h1>
+          <Braces size={36} color="var(--accent-primary)" />
+          JSON Debugger & Fixer
+        </h1>
+        <p>Fix messy API JSON instantly. Debug broken JSON in seconds.</p>
+        
+        <div className="security-banner">
+          <div className="security-item">
+            <ShieldCheck size={18} className="text-success" />
+            <span><strong>Zero Data Leakage:</strong> Processing happens 100% locally. No network requests are made.</span>
           </div>
         </div>
 
-        <div className="header-actions">
-           <div className="theme-selector-container" ref={menuRef}>
-            <button className="icon-button" onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}>
-              <Palette size={18} />
-            </button>
-            {isThemeMenuOpen && (
-              <div className="theme-dropdown">
-                {THEMES.map((t) => (
-                  <button key={t.id} onClick={() => { setTheme(t.id); setIsThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === t.id ? 'active' : ''}`}>
-                    <span className="theme-color-dot" style={{ backgroundColor: t.color }}></span>
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="theme-selector-container" ref={menuRef}>
+          <button className="theme-toggle-btn" onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}>
+            <Palette size={18} />
+            <span>Theme</span>
+          </button>
+          
+          {isThemeMenuOpen && (
+            <div className="theme-dropdown">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => { setTheme(t.id as ThemeType); setIsThemeMenuOpen(false); }}
+                  className={`theme-dropdown-item ${theme === t.id ? 'active' : ''}`}
+                >
+                  <span className="theme-color-dot" style={{ backgroundColor: t.color }}></span>
+                  <span className="theme-name">{t.name}</span>
+                  {theme === t.id && <CheckCircle2 size={16} className="theme-check" />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
-      <div className="ide-workspace">
-        <aside className="activity-bar">
-          <button className={`nav-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')} title="Formatter & Messy JSON Fixer">
-            <FileJson size={24} />
-          </button>
-          <button className={`nav-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')} title="JSON Diff Compare">
-            <SplitSquareHorizontal size={24} />
-          </button>
-          <button className={`nav-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')} title="JSON to YAML">
-            <FileText size={24} />
-          </button>
-          <button className={`nav-btn ${mode === 'csv' ? 'active' : ''}`} onClick={() => setMode('csv')} title="JSON to CSV">
-            <FileSpreadsheet size={24} />
-          </button>
-          <button className={`nav-btn ${mode === 'ts' ? 'active' : ''}`} onClick={() => setMode('ts')} title="Generate TS Interfaces">
-            <FileCode size={24} />
-          </button>
-          <div className="spacer"></div>
-          <button className="nav-btn" onClick={() => fileInputRef.current?.click()} title="Upload Local File">
-             <UploadCloud size={24} />
-             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
-          </button>
-        </aside>
+      {/* Mode Tabs - Much clearer than a sidebar! */}
+      <div className="mode-tabs">
+        <button className={`tab-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')}>
+          <FileJson size={18} /> Formatter & Fixer
+        </button>
+        <button className={`tab-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')}>
+          <SplitSquareHorizontal size={18} /> Compare Diff
+        </button>
+        <button className={`tab-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')}>
+          <FileText size={18} /> To YAML
+        </button>
+        <button className={`tab-btn ${mode === 'ts' ? 'active' : ''}`} onClick={() => setMode('ts')}>
+          <FileCode size={18} /> To TypeScript
+        </button>
+        <div style={{flex: 1}}></div>
+        <button className="tab-btn outline" onClick={() => fileInputRef.current?.click()}>
+          <UploadCloud size={18} /> Upload JSON File
+          <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
+        </button>
+      </div>
 
-        <main className="editor-area">
+      <main className="main-content">
+        <div className="workspace-card">
           {mode === 'diff' ? (
             <div className="diff-layout-container">
                <div className="diff-toolbars">
                   <div className="pane-toolbar" style={{flex: 1}}>
-                    <span>Original JSON</span>
+                    <span className="toolbar-title">Original JSON</span>
                   </div>
                   <div className="pane-toolbar" style={{flex: 1}}>
-                    <span>Modified JSON</span>
+                    <span className="toolbar-title">Modified JSON</span>
                   </div>
                </div>
               <DiffEditor
-                height="calc(100% - 32px)"
+                height="600px"
                 language="json"
                 theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
                 original={diffOriginal}
@@ -272,77 +277,74 @@ function App() {
             <div className="split-layout">
               <div className="pane-wrapper">
                 <div className="pane-toolbar">
-                  <span>Input JSON (Cmd+F to Search)</span>
+                  <span className="toolbar-title">Input JSON (Cmd+F to Search)</span>
                   <div className="toolbar-actions">
                     <button onClick={() => setInputData('')} className="tool-btn"><Trash2 size={14} /> Clear</button>
                     <button onClick={() => handleCopy(inputData)} className="tool-btn"><Copy size={14} /> Copy</button>
                   </div>
                 </div>
-                <Editor
-                  height="100%"
-                  defaultLanguage="json"
-                  value={inputData}
-                  onChange={(val) => setInputData(val || '')}
-                  theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                  options={{ minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: true, scrollbar: { verticalScrollbarSize: 8 } }}
-                />
+                <div className="editor-container">
+                  <Editor
+                    height="100%"
+                    defaultLanguage="json"
+                    value={inputData}
+                    onChange={(val) => setInputData(val || '')}
+                    theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
+                    options={{ minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: true, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
+                  />
+                </div>
               </div>
 
               <div className="pane-wrapper">
                 <div className="pane-toolbar">
-                  <span>{mode === 'formatter' ? 'Fixed & Formatted Output' : `${mode.toUpperCase()} Output`}</span>
+                  <span className="toolbar-title">{mode === 'formatter' ? 'Fixed & Formatted Output' : `${mode.toUpperCase()} Output`}</span>
                   <div className="toolbar-actions">
                     <button onClick={copyFormatted} className="tool-btn" title="Copy Formatted JSON"><Copy size={14} /> Formatted</button>
                     <button onClick={copyMinified} className="tool-btn" title="Copy Minified (1 Line)"><Copy size={14} /> Minified</button>
                     <button onClick={copyEscaped} className="tool-btn" title="Copy Escaped String"><Copy size={14} /> Escaped</button>
                   </div>
                 </div>
-                {status === 'error' ? (
-                  <div className="error-display">
-                    <Bug size={36} />
-                    <h3>❌ Parse Error Detected</h3>
-                    <p className="error-text-highlight">{errorMsg}</p>
-                    <button className="repair-btn" onClick={() => {
-                        const repaired = formatOrRepairJson(inputData, 2);
-                        if (repaired.fixed) setInputData(repaired.result);
-                    }}>Force Auto-Repair Messy JSON</button>
-                    <p style={{fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem'}}>
-                      Fixes single quotes, True/False, None, and trailing commas.
-                    </p>
-                  </div>
-                ) : (
-                  <Editor
-                    height="100%"
-                    language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
-                    value={outputData}
-                    theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                    options={{ readOnly: true, minimap: { enabled: false }, wordWrap: 'on', scrollbar: { verticalScrollbarSize: 8 } }}
-                  />
-                )}
+                
+                <div className="editor-container">
+                  {status === 'error' ? (
+                    <div className="error-display">
+                      <Bug size={48} color="var(--error-color)" style={{marginBottom: '1rem'}} />
+                      <h3 style={{margin: 0, fontSize: '1.2rem'}}>❌ Parse Error Detected</h3>
+                      <div className="error-text-highlight">{errorMsg}</div>
+                      <button className="repair-btn" onClick={() => {
+                          const repaired = formatOrRepairJson(inputData, 2);
+                          if (repaired.fixed) setInputData(repaired.result);
+                      }}>Force Auto-Repair Messy JSON</button>
+                      <p style={{fontSize: '0.85rem', opacity: 0.7, marginTop: '1rem'}}>
+                        This tool fixes single quotes, Python's True/False/None, and trailing commas seamlessly.
+                      </p>
+                    </div>
+                  ) : (
+                    <Editor
+                      height="100%"
+                      language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
+                      value={outputData}
+                      theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
+                      options={{ readOnly: true, minimap: { enabled: false }, wordWrap: 'on', scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           )}
-        </main>
-      </div>
+        </div>
 
-      <footer className="ide-statusbar">
-        <div className="status-left">
-          <span className={`status-dot ${status}`}></span>
-          <span className="status-text">
-            {status === 'idle' ? 'Ready' : 
-             status === 'success' ? 'Valid JSON' : 
-             status === 'fixing' ? 'Auto-Repaired Messy JSON' : 
-             'Syntax Error'}
-          </span>
+        {/* JSON Stats Footer aligned below editors */}
+        <div className="stats-footer">
+           <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Repaired JSON' : 'Syntax Error'}</div>
+           <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
+           <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
+           <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
+           <div style={{flex: 1}}></div>
+           <div className="stat-pill subtle">[Cmd+Enter] Format</div>
+           <div className="stat-pill subtle">[Cmd+M] Minify</div>
         </div>
-        <div className="status-right">
-          <span>{stats.sizeKB} KB</span>
-          <span>{stats.keysCount} Keys</span>
-          <span>Depth: {stats.maxDepth}</span>
-          <span>[Cmd+Enter] Format</span>
-          <span>[Cmd+M] Minify</span>
-        </div>
-      </footer>
+      </main>
 
       {toast && (
         <div className="toast">
