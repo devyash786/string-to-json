@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Copy, ChevronDown } from 'lucide-react';
+import { Clipboard, ChevronDown } from 'lucide-react';
 import { ErrorDisplay } from './ErrorDisplay';
 
 interface OutputViewerProps {
@@ -48,12 +48,22 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
           FIXED JSON
           <span className="sub-label" style={{ marginLeft: '8px' }}>Parsed result</span>
         </div>
-        <div className="toolbar-actions" style={{ position: 'relative' }} ref={dropdownRef}>
-          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }} title="Copy as formatted JSON"><Copy size={13} /> COPY</button>
-          <button onClick={() => setDropdownOpen(!dropdownOpen)} className="modular-btn" style={{ padding: '4px 8px' }} title="Show more options"><ChevronDown size={14} style={{ opacity: 0.8 }} /></button>
+        <div className="toolbar-actions" style={{ position: 'relative', display: 'flex', gap: '4px' }} ref={dropdownRef}>
+          <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '4px 10px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent', display: 'flex', alignItems: 'center', gap: '6px' }} title="Copy as formatted JSON">
+            <Clipboard size={14} /> 
+            <span style={{ fontSize: '11px', fontWeight: 700 }}>COPY</span>
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }} 
+            className={`modular-btn ${dropdownOpen ? 'active' : ''}`} 
+            style={{ padding: '4px', width: '30px', justifyContent: 'center' }} 
+            title="Show more options"
+          >
+            <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: dropdownOpen ? 'rotate(180deg)' : 'none' }} />
+          </button>
           
           {dropdownOpen && (
-            <div className="theme-dropdown" style={{ top: '100%', right: 0, marginTop: '8px', width: '160px' }}>
+            <div className="theme-dropdown" style={{ top: '100%', right: 0, marginTop: '8px', width: '180px', zIndex: 9999 }}>
               <button 
                 onClick={() => { onCopyFormatted(); setDropdownOpen(false); }} 
                 className="theme-dropdown-item" 

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Editor, { type Monaco } from '@monaco-editor/react';
-import { Copy, Trash2, Search as SearchIcon } from 'lucide-react';
+import { Clipboard, Trash2, Search as SearchIcon } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 
 interface JsonEditorProps {
@@ -41,10 +41,10 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
           ORIGINAL INPUT
           <span className="sub-label" style={{ marginLeft: '8px' }}>Paste your escaped string</span>
         </div>
-        <div className="toolbar-actions">
-          <button onClick={() => setShowSearch(!showSearch)} className={`tool-btn ${showSearch ? 'active' : ''}`} title="Search (Cmd+F)"><SearchIcon size={14} /> Search</button>
-          <button onClick={onClear} className="tool-btn" title="Clear All Text"><Trash2 size={14} /> Clear</button>
-          <button onClick={onCopy} className="tool-btn" title="Copy Input Source"><Copy size={14} /> Copy</button>
+        <div className="toolbar-actions" style={{ display: 'flex', gap: '4px' }}>
+          <button onClick={() => setShowSearch(!showSearch)} className={`modular-btn ${showSearch ? 'active' : ''}`} title="Search (Cmd+F)"><SearchIcon size={14} /> SEARCH</button>
+          <button onClick={onClear} className="modular-btn" title="Clear All Text"><Trash2 size={14} /> CLEAR</button>
+          <button onClick={onCopy} className="modular-btn" title="Copy Input Source" style={{ backgroundColor: 'transparent', color: 'var(--text-primary)' }}><Clipboard size={14} /> COPY</button>
         </div>
       </div>
       
