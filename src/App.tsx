@@ -214,7 +214,7 @@ function App() {
         {theme === 'theme-light' ? <Moon size={18} /> : <Sun size={18} />}
       </button>
 
-      <header className="header" style={{ textAlign: 'center', marginBottom: '1.2rem', paddingTop: '1rem' }}>
+      <header className="header" style={{ textAlign: 'center', marginBottom: '0.5rem', paddingTop: '0.5rem' }}>
         <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.2rem', fontWeight: 700 }}>
           <Braces size={32} color="var(--accent-primary)" />
           Fix Broken JSON
@@ -265,8 +265,8 @@ function App() {
               backgroundColor: status === 'success' ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-hover)', 
               color: status === 'success' ? 'var(--text-success)' : 'var(--text-muted)', 
               borderBottom: '1px solid var(--border-color)', 
-              padding: '0.6rem 1rem', 
-              fontSize: '13px', 
+              padding: '0.4rem 1rem', 
+              fontSize: '12px', 
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.5rem', 
