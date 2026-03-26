@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle,
-  Palette, UploadCloud, SplitSquareHorizontal
+  Braces, CheckCircle2, AlertCircle,
+  UploadCloud, Sun, Moon, Zap, ShieldCheck, BrainCircuit
 } from 'lucide-react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
@@ -14,19 +14,9 @@ import { DiffViewer } from './components/DiffViewer';
 type Mode = 'formatter' | 'diff' | 'yaml' | 'csv' | 'ts';
 type ThemeType = 'theme-midnight' | 'theme-ocean' | 'theme-forest' | 'theme-rose' | 'theme-netflix' | 'theme-light';
 
-const THEMES = [
-  { id: 'theme-midnight', color: '#6366f1', name: 'Midnight' },
-  { id: 'theme-ocean', color: '#0ea5e9', name: 'Ocean' },
-  { id: 'theme-forest', color: '#10b981', name: 'Forest' },
-  { id: 'theme-rose', color: '#f43f5e', name: 'Rose' },
-  { id: 'theme-netflix', color: '#e50914', name: 'Netflix' },
-  { id: 'theme-light', color: '#f8fafc', name: 'Light' },
-] as const;
-
 function App() {
   const [theme, setTheme] = useState<ThemeType>('theme-midnight');
   const [mode, setMode] = useState<Mode>('formatter');
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [suggestion, setSuggestion] = useState<string | null>(null);
 
@@ -45,7 +35,6 @@ function App() {
   const [stats, setStats] = useState({ sizeKB: '0', keysCount: 0, maxDepth: 0 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.className = theme;
@@ -166,69 +155,88 @@ function App() {
       showToast('Copied as JS Object', 'success');
     }
   };
+  // Resize logic
+  const splitRef = useRef<HTMLDivElement>(null);
+  const [leftWidth, setLeftWidth] = useState(45); // 45% default
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!splitRef.current) return;
+      const bounds = splitRef.current.getBoundingClientRect();
+      let newWidth = ((e.clientX - bounds.left) / bounds.width) * 100;
+      if (newWidth < 20) newWidth = 20;
+      if (newWidth > 80) newWidth = 80;
+      setLeftWidth(newWidth);
+    };
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+  }, []);
 
   return (
     <div className="app-container" onDrop={(e) => { e.preventDefault(); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }} onDragOver={(e) => e.preventDefault()}>
-      <header className="header" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.5rem', fontWeight: 800 }}>
-          <Braces size={40} color="var(--accent-primary)" />
-          Fix Broken JSON in 1 Click
-        </h1>
-        <p style={{ fontSize: '1.1rem', opacity: 0.8, marginTop: '0.6rem' }}>Parse escaped strings, logs, and API payloads instantly — 100% client-side & private.</p>
-        
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '1.2rem' }}>
-          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>⚡ Instant</span>
-          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>🔒 Private</span>
-          <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>🧠 Smart Parsing</span>
-        </div>
+      <button className="theme-toggle-ghost" onClick={() => setTheme(theme === 'theme-light' ? 'theme-midnight' : 'theme-light')} title="Toggle Theme">
+        {theme === 'theme-light' ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
 
-        <div className="theme-selector-container" ref={menuRef}>
-          <button className="theme-toggle-btn" onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}>
-            <Palette size={18} /> <span>Theme</span>
-          </button>
-          {isThemeMenuOpen && (
-            <div className="theme-dropdown">
-              {THEMES.map((t) => (
-                <button key={t.id} onClick={() => { setTheme(t.id as ThemeType); setIsThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === t.id ? 'active' : ''}`}>
-                  <span className="theme-color-dot" style={{ backgroundColor: t.color }}></span> <span className="theme-name">{t.name}</span>
-                  {theme === t.id && <CheckCircle2 size={16} className="theme-check" />}
-                </button>
-              ))}
-            </div>
-          )}
+      <header className="header" style={{ textAlign: 'center', marginBottom: '1.2rem', paddingTop: '1rem' }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.2rem', fontWeight: 700 }}>
+          <Braces size={32} color="var(--accent-primary)" />
+          Fix Broken JSON
+        </h1>
+        <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: '520px', margin: '0.4rem auto 1rem', lineHeight: 1.4 }}>
+          100% client-side. Your data never leaves the browser.
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <span className="badge"><Zap size={14} /> Instant</span>
+          <span className="badge"><ShieldCheck size={14} /> Private</span>
+          <span className="badge"><BrainCircuit size={14} /> Smart Parsing</span>
         </div>
       </header>
 
-      <div className="mode-tabs">
-        <button className={`tab-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')}>
-          <FileJson size={18} /> Formatter & Fixer
-        </button>
-        <button className={`tab-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')}>
-          <SplitSquareHorizontal size={18} /> Compare Diff
-        </button>
-        <button className={`tab-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')}>
-          <FileText size={18} /> To YAML
-        </button>
-        <button className={`tab-btn ${mode === 'ts' ? 'active' : ''}`} onClick={() => setMode('ts')}>
-          <FileCode size={18} /> To TypeScript
-        </button>
-        <div style={{flex: 1}}></div>
+      <main className="main-content">
+        <div className="mode-tabs" style={{ padding: '0 0 1rem 0', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem', display: 'flex' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+            <button className={`tab-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')}>Formatter</button>
+            <button className={`tab-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')}>Diff</button>
+            <button className={`tab-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')}>To YAML</button>
+            <button className={`tab-btn ${mode === 'ts' ? 'active' : ''}`} onClick={() => setMode('ts')}>To TS</button>
+          </div>
 
-        <div className="sample-data-chips">
-          <span style={{ fontSize: '0.8rem', opacity: 0.6, fontWeight: 600 }}>Action:</span>
-          <button className="chip" onClick={() => setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"')}>Try Escaped</button>
-          <button className="chip" onClick={() => setInputData("{'name': 'Dev', active: True, val: None,}")}>Try Broken</button>
-          <button className="chip" onClick={() => setInputData("2026-03-26 10:15:30 [INFO] Payload received: {\"status\": 200, \"data\": [1,2,3]}")}>Try Log Payload</button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
+            <select className="select-dropdown" onChange={(e) => {
+              if (e.target.value === 'escaped') setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"');
+              if (e.target.value === 'broken') setInputData("{'name': 'Dev', active: True, val: None,}");
+              if (e.target.value === 'log') setInputData("2026-03-26 [INFO] Payload received: {\"status\": 200, \"data\": [1,2,3]}");
+              e.target.value = 'none';
+            }}>
+              <option value="none">Parse as...</option>
+              <option value="escaped">Escaped string</option>
+              <option value="broken">Broken JSON</option>
+              <option value="log">Log payload</option>
+            </select>
+            <button className="icon-btn-ghost" title="Upload JSON" onClick={() => fileInputRef.current?.click()}>
+              <UploadCloud size={16} />
+              <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
+            </button>
+          </div>
         </div>
 
-        <button className="tab-btn outline" onClick={() => fileInputRef.current?.click()}>
-          <UploadCloud size={18} /> Upload JSON
-          <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
-        </button>
-      </div>
-
-      <main className="main-content">
         <div className="workspace-card">
+          {suggestion && (
+            <div style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BrainCircuit size={14} color="var(--accent-primary)" /> {suggestion}
+            </div>
+          )}
+
           {mode === 'diff' ? (
             <DiffViewer
               theme={theme}
@@ -239,35 +247,40 @@ function App() {
               onToast={showToast}
             />
           ) : (
-            <>
-              {suggestion && (
-                <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', textAlign: 'center', fontSize: '0.85rem', fontWeight: 500, borderRadius: '4px', margin: '0 1rem 0.5rem' }}>
-                  {suggestion}
-                </div>
-              )}
-              <div className="split-layout">
+            <div className="split-layout" ref={splitRef}>
+              <div style={{ flex: `0 0 ${leftWidth}%`, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <JsonEditor
-                value={inputData}
-                onChange={setInputData}
-                theme={theme}
-                onClear={() => setInputData('')}
-                onCopy={() => { navigator.clipboard.writeText(inputData); showToast('Copied', 'success'); }}
-              />
-              <OutputViewer
-                value={outputData}
-                theme={theme}
-                mode={mode}
-                status={status}
-                errorMsg={errorMsg}
-                errorLine={errorLine}
-                errorCol={errorCol}
-                onFix={forceAutoRepair}
+                  value={inputData}
+                  onChange={setInputData}
+                  theme={theme}
+                  onClear={() => setInputData('')}
+                  onCopy={() => { navigator.clipboard.writeText(inputData); showToast('Copied Input', 'success'); }}
+                />
+              </div>
+
+              <div
+                onMouseDown={handleMouseDown}
+                style={{ width: '4px', cursor: 'col-resize', backgroundColor: 'var(--border-color)', zIndex: 10, transition: 'background 0.2s', flexShrink: 0 }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-primary)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--border-color)'}
+              ></div>
+
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <OutputViewer
+                  value={outputData}
+                  theme={theme}
+                  mode={mode}
+                  status={status}
+                  errorMsg={errorMsg}
+                  errorLine={errorLine}
+                  errorCol={errorCol}
+                  onFix={forceAutoRepair}
                   onCopyFormatted={() => copyOut('formatted')}
                   onCopyMinified={() => copyOut('minified')}
                   onCopyJS={() => copyOut('js')}
                 />
               </div>
-            </>
+            </div>
           )}
         </div>
 

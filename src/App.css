@@ -161,6 +161,40 @@ body {
   color: var(--text-primary);
 }
 
+.theme-toggle-ghost {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-short);
+}
+
+.theme-toggle-ghost:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  font-weight: 500;
+}
+
 .tab-btn.active {
   background: var(--accent-primary);
   color: white;
