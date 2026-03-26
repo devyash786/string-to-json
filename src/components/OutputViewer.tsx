@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Clipboard, ChevronDown, Search as SearchIcon } from 'lucide-react';
+import { Copy, ChevronDown, Search as SearchIcon } from 'lucide-react';
 import { ErrorDisplay } from './ErrorDisplay';
 
 interface OutputViewerProps {
@@ -63,7 +63,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
         <div className="toolbar-actions" style={{ position: 'relative', display: 'flex', gap: '4px' }} ref={dropdownRef}>
           <button onClick={handleToggleSearch} className="modular-btn" style={{ padding: '6px' }} title="Search (Cmd+F)"><SearchIcon size={14} /></button>
           <button onClick={onCopyFormatted} className="modular-btn" style={{ padding: '6px', backgroundColor: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }} title="Copy as formatted JSON">
-            <Clipboard size={14} /> 
+            <Copy size={14} /> 
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }} 

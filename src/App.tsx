@@ -277,17 +277,8 @@ function App() {
       </header>
 
       <main className="main-content">
-        <div className="mode-tabs" style={{ padding: '0 0 1rem 0', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem', display: 'flex' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
-            <button className={`tab-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')}>Formatter</button>
-            <button className={`tab-btn ${mode === 'diff' ? 'active' : ''}`} onClick={() => setMode('diff')}>Diff</button>
-            <button className={`tab-btn ${mode === 'yaml' ? 'active' : ''}`} onClick={() => setMode('yaml')}>To YAML</button>
-            <button className={`tab-btn ${mode === 'ts' ? 'active' : ''}`} onClick={() => setMode('ts')}>To TS</button>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--border-color)', margin: '0 0.5rem' }}></div>
-            <div className="modular-selector">
+        <div className="workspace-header-actions" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+          <div className="modular-selector">
               <button 
                 className={`modular-selector-btn ${activeSample === 'escaped' ? 'active' : ''}`}
                 onClick={() => { setInputData('"{\\"user\\": \\"Yash\\", \\"settings\\": {\\"theme\\": \\"dark\\"}}"'); setActiveSample('escaped'); }}
@@ -315,7 +306,6 @@ function App() {
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
             </button>
           </div>
-        </div>
 
         <div className="workspace-card">
           {suggestion && (

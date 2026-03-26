@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Clipboard, Trash2, Search as SearchIcon } from 'lucide-react';
+import { Copy, Trash2, Search as SearchIcon } from 'lucide-react';
 // SearchBar.tsx no longer needed, using native Monaco Find widget
 
 interface JsonEditorProps {
@@ -35,7 +35,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
         <div className="toolbar-actions" style={{ display: 'flex', gap: '6px' }}>
           <button onClick={handleToggleSearch} className="modular-btn" style={{ padding: '6px' }} title="Search (Cmd+F)"><SearchIcon size={14} /></button>
           <button onClick={onClear} className="modular-btn" style={{ padding: '6px' }} title="Clear All Text"><Trash2 size={14} /></button>
-          <button onClick={onCopy} className="modular-btn" style={{ padding: '6px', backgroundColor: 'transparent', color: 'var(--text-primary)' }} title="Copy Input Source"><Clipboard size={14} /></button>
+          <button onClick={onCopy} className="modular-btn" style={{ padding: '6px', backgroundColor: 'transparent', color: 'var(--text-primary)' }} title="Copy Input Source"><Copy size={14} /></button>
         </div>
       </div>
       
