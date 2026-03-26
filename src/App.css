@@ -188,6 +188,33 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+}
+.search-input {
+  flex: 1;
+  background: var(--input-bg, transparent);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+.search-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.2rem;
+  margin-left: 0.2rem;
+}
+.search-nav-btn:hover { color: var(--text-primary); }
+
 .toolbar-title {
   font-size: 0.8rem;
   color: var(--text-secondary);

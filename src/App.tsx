@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle, Copy, Trash2,
-  Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, Bug
+  Braces, FileJson, FileText, FileCode, CheckCircle2, AlertCircle,
+  Palette, ShieldCheck, UploadCloud, SplitSquareHorizontal, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import Editor, { DiffEditor } from '@monaco-editor/react';
-import { formatOrRepairJson, convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
+import { DiffEditor } from '@monaco-editor/react';
+import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
+import { fixJson } from './utils/fixJson';
+
 import './App.css';
+import { JsonEditor } from './components/JsonEditor';
+import { OutputViewer } from './components/OutputViewer';
 
 type Mode = 'formatter' | 'diff' | 'yaml' | 'csv' | 'ts';
 type ThemeType = 'theme-midnight' | 'theme-ocean' | 'theme-forest' | 'theme-rose' | 'theme-netflix' | 'theme-light';
@@ -25,6 +29,9 @@ function App() {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // New toggle state
+  const [autoFormat, setAutoFormat] = useState(true);
+
   // Editor State
   const [inputData, setInputData] = useState<string>('');
   const [diffOriginal, setDiffOriginal] = useState<string>('{\n  "paste_original_here": true\n}');
@@ -32,7 +39,9 @@ function App() {
   
   // Status and Stats
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'fixing'>('idle');
-  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [errorMsg, setErrorMsg] = useState<string | null>('');
+  const [errorLine, setErrorLine] = useState<number | null>(null);
+  const [errorCol, setErrorCol] = useState<number | null>(null);
   const [stats, setStats] = useState({ sizeKB: '0', keysCount: 0, maxDepth: 0 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,25 +50,6 @@ function App() {
   useEffect(() => {
     document.body.className = theme;
   }, [theme]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsThemeMenuOpen(false);
-      }
-    };
-    if (isThemeMenuOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isThemeMenuOpen]);
-
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
 
   // Sync back to URL
   useEffect(() => {
@@ -73,7 +63,9 @@ function App() {
     return () => clearTimeout(timer);
   }, [inputData]);
 
-  // Master Processor
+  const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
+
+  // Core parsing mapped through fixJson util
   const processInput = useCallback(() => {
     if (!inputData.trim()) {
       setOutputData('');
@@ -83,22 +75,21 @@ function App() {
 
     try {
       if (mode === 'formatter') {
-        const { result, fixed, error } = formatOrRepairJson(inputData);
-        if (error) throw new Error(error);
-        
-        setOutputData(result);
-        setStatus(fixed ? 'fixing' : 'success');
-        setErrorMsg('');
-      } else if (mode === 'yaml') {
-        setOutputData(convertToYaml(inputData));
-        setStatus('success');
-      } else if (mode === 'csv') {
-        setOutputData(convertToCsv(inputData));
-        setStatus('success');
-      } else if (mode === 'ts') {
-        setOutputData(convertToTS(inputData));
-        setStatus('success');
-      }
+        const { repaired, isFixed, error, line, col } = fixJson(inputData);
+        if (error) {
+          setOutputData('');
+          setStatus('error');
+          setErrorMsg(error);
+          setErrorLine(line);
+          setErrorCol(col);
+        } else {
+          setOutputData(repaired);
+          setStatus(isFixed ? 'fixing' : 'success');
+          setErrorMsg(null);
+        }
+      } else if (mode === 'yaml') { setOutputData(convertToYaml(inputData)); setStatus('success'); }
+      else if (mode === 'csv') { setOutputData(convertToCsv(inputData)); setStatus('success'); }
+      else if (mode === 'ts') { setOutputData(convertToTS(inputData)); setStatus('success'); }
       
       setStats(getJsonStats(inputData));
     } catch (err: any) {
@@ -109,36 +100,14 @@ function App() {
   }, [inputData, mode]);
 
   useEffect(() => {
-    processInput();
-  }, [processInput]);
+    if (autoFormat) processInput();
+  }, [inputData, mode, autoFormat]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey)) {
-        if (e.key === 'Enter') {
-          processInput();
-          showToast('Forced Format', 'success');
-        } else if (e.key === 'm') {
-          e.preventDefault();
-          try {
-            setInputData(JSON.stringify(JSON.parse(inputData)));
-            showToast('Minified JSON', 'success');
-          } catch(e) {}
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [inputData, processInput]);
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && (file.type === 'application/json' || file.name.endsWith('.json'))) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setInputData(ev.target?.result as string);
-      reader.readAsText(file);
-      showToast(`Loaded ${file.name}`, 'success');
+  const forceAutoRepair = () => {
+    const result = fixJson(inputData);
+    if (!result.error && result.repaired !== inputData) {
+      setInputData(result.repaired);
+      showToast('Successfully repaired Messy JSON!', 'success');
     }
   };
 
@@ -152,39 +121,21 @@ function App() {
     }
   };
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    showToast('Copied to clipboard', 'success');
-  };
-
-  const copyFormatted = () => {
-    navigator.clipboard.writeText(outputData);
-    showToast('Copied Formatted', 'success');
-  };
-
-  const copyMinified = () => {
-    try {
-      const mini = JSON.stringify(JSON.parse(outputData));
-      navigator.clipboard.writeText(mini);
-      showToast('Copied Minified', 'success');
-    } catch (e) {
-      navigator.clipboard.writeText(outputData.replace(/\s+/g, ''));
-      showToast('Copied Minified Space', 'success');
+  const copyOut = (type: 'formatted' | 'minified' | 'escaped') => {
+    if (type === 'formatted') {
+      navigator.clipboard.writeText(outputData);
+      showToast('Copied Formatted', 'success');
+    } else if (type === 'minified') {
+      try { navigator.clipboard.writeText(JSON.stringify(JSON.parse(outputData))); showToast('Copied Minified', 'success'); } 
+      catch { navigator.clipboard.writeText(outputData.replace(/\s+/g, '')); showToast('Copied Minified Space', 'success'); }
+    } else if (type === 'escaped') {
+      navigator.clipboard.writeText(JSON.stringify(outputData));
+      showToast('Copied Escaped', 'success');
     }
   };
 
-  const copyEscaped = () => {
-    const escaped = JSON.stringify(outputData);
-    navigator.clipboard.writeText(escaped);
-    showToast('Copied Escaped', 'success');
-  };
-
   return (
-    <div 
-      className="app-container"
-      onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
-    >
+    <div className="app-container" onDrop={(e) => { e.preventDefault(); handleFileUpload({ target: { files: e.dataTransfer.files } } as any); }} onDragOver={(e) => e.preventDefault()}>
       <header className="header">
         <h1>
           <Braces size={36} color="var(--accent-primary)" />
@@ -201,20 +152,13 @@ function App() {
 
         <div className="theme-selector-container" ref={menuRef}>
           <button className="theme-toggle-btn" onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}>
-            <Palette size={18} />
-            <span>Theme</span>
+            <Palette size={18} /> <span>Theme</span>
           </button>
-          
           {isThemeMenuOpen && (
             <div className="theme-dropdown">
               {THEMES.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => { setTheme(t.id as ThemeType); setIsThemeMenuOpen(false); }}
-                  className={`theme-dropdown-item ${theme === t.id ? 'active' : ''}`}
-                >
-                  <span className="theme-color-dot" style={{ backgroundColor: t.color }}></span>
-                  <span className="theme-name">{t.name}</span>
+                <button key={t.id} onClick={() => { setTheme(t.id as ThemeType); setIsThemeMenuOpen(false); }} className={`theme-dropdown-item ${theme === t.id ? 'active' : ''}`}>
+                  <span className="theme-color-dot" style={{ backgroundColor: t.color }}></span> <span className="theme-name">{t.name}</span>
                   {theme === t.id && <CheckCircle2 size={16} className="theme-check" />}
                 </button>
               ))}
@@ -223,7 +167,6 @@ function App() {
         </div>
       </header>
 
-      {/* Mode Tabs - Much clearer than a sidebar! */}
       <div className="mode-tabs">
         <button className={`tab-btn ${mode === 'formatter' ? 'active' : ''}`} onClick={() => setMode('formatter')}>
           <FileJson size={18} /> Formatter & Fixer
@@ -238,6 +181,13 @@ function App() {
           <FileCode size={18} /> To TypeScript
         </button>
         <div style={{flex: 1}}></div>
+
+        {/* Auto Format Toggle */}
+        <button className={`tab-btn ${autoFormat ? 'active' : ''}`} onClick={() => { setAutoFormat(!autoFormat); !autoFormat && processInput(); }}>
+          {autoFormat ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+          Auto Format
+        </button>
+
         <button className="tab-btn outline" onClick={() => fileInputRef.current?.click()}>
           <UploadCloud size={18} /> Upload JSON File
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" hidden />
@@ -247,102 +197,55 @@ function App() {
       <main className="main-content">
         <div className="workspace-card">
           {mode === 'diff' ? (
-            <div className="diff-layout-container">
-               <div className="diff-toolbars">
-                  <div className="pane-toolbar" style={{flex: 1}}>
-                    <span className="toolbar-title">Original JSON</span>
-                  </div>
-                  <div className="pane-toolbar" style={{flex: 1}}>
-                    <span className="toolbar-title">Modified JSON</span>
-                  </div>
-               </div>
+            <div className="diff-layout-container" style={{ width: '100%', height: '100%' }}>
+              <div className="diff-toolbars">
+                <div className="pane-toolbar" style={{flex: 1}}><span className="toolbar-title">Original JSON</span></div>
+                <div className="pane-toolbar" style={{flex: 1}}><span className="toolbar-title">Modified JSON</span></div>
+              </div>
               <DiffEditor
-                height="600px"
+                height="65vh"
                 language="json"
                 theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
                 original={diffOriginal}
                 modified={inputData}
                 options={{ renderSideBySide: true, minimap: { enabled: false }, originalEditable: true }}
                 onMount={(editor) => {
-                  editor.getOriginalEditor().onDidChangeModelContent(() => {
-                    setDiffOriginal(editor.getOriginalEditor().getValue());
-                  });
-                  editor.getModifiedEditor().onDidChangeModelContent(() => {
-                    setInputData(editor.getModifiedEditor().getValue());
-                  });
+                  editor.getOriginalEditor().onDidChangeModelContent(() => setDiffOriginal(editor.getOriginalEditor().getValue()));
+                  editor.getModifiedEditor().onDidChangeModelContent(() => setInputData(editor.getModifiedEditor().getValue()));
                 }}
               />
             </div>
           ) : (
             <div className="split-layout">
-              <div className="pane-wrapper">
-                <div className="pane-toolbar">
-                  <span className="toolbar-title">Input JSON (Cmd+F to Search)</span>
-                  <div className="toolbar-actions">
-                    <button onClick={() => setInputData('')} className="tool-btn"><Trash2 size={14} /> Clear</button>
-                    <button onClick={() => handleCopy(inputData)} className="tool-btn"><Copy size={14} /> Copy</button>
-                  </div>
-                </div>
-                <div className="editor-container" style={{ minHeight: '500px' }}>
-                  <Editor
-                    height="65vh"
-                    defaultLanguage="json"
-                    value={inputData}
-                    onChange={(val) => setInputData(val || '')}
-                    theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                    options={{ minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: false, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
-                  />
-                </div>
-              </div>
-
-              <div className="pane-wrapper">
-                <div className="pane-toolbar">
-                  <span className="toolbar-title">{mode === 'formatter' ? 'Fixed & Formatted Output' : `${mode.toUpperCase()} Output`}</span>
-                  <div className="toolbar-actions">
-                    <button onClick={copyFormatted} className="tool-btn" title="Copy Formatted JSON"><Copy size={14} /> Formatted</button>
-                    <button onClick={copyMinified} className="tool-btn" title="Copy Minified (1 Line)"><Copy size={14} /> Minified</button>
-                    <button onClick={copyEscaped} className="tool-btn" title="Copy Escaped String"><Copy size={14} /> Escaped</button>
-                  </div>
-                </div>
-                
-                <div className="editor-container">
-                  {status === 'error' ? (
-                    <div className="error-display">
-                      <Bug size={48} color="var(--error-color)" style={{marginBottom: '1rem'}} />
-                      <h3 style={{margin: 0, fontSize: '1.2rem'}}>❌ Parse Error Detected</h3>
-                      <div className="error-text-highlight">{errorMsg}</div>
-                      <button className="repair-btn" onClick={() => {
-                          const repaired = formatOrRepairJson(inputData, 2);
-                          if (repaired.fixed) setInputData(repaired.result);
-                      }}>Force Auto-Repair Messy JSON</button>
-                      <p style={{fontSize: '0.85rem', opacity: 0.7, marginTop: '1rem'}}>
-                        This tool fixes single quotes, Python's True/False/None, and trailing commas seamlessly.
-                      </p>
-                    </div>
-                  ) : (
-                    <Editor
-                      height="65vh"
-                      language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
-                      value={outputData}
-                      theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
-                      options={{ readOnly: true, minimap: { enabled: false }, wordWrap: 'on', formatOnPaste: false, scrollbar: { verticalScrollbarSize: 8 }, padding: { top: 16 } }}
-                    />
-                  )}
-                </div>
-              </div>
+              <JsonEditor
+                value={inputData}
+                onChange={setInputData}
+                theme={theme}
+                onClear={() => setInputData('')}
+                onCopy={() => { navigator.clipboard.writeText(inputData); showToast('Copied', 'success'); }}
+              />
+              <OutputViewer
+                value={outputData}
+                theme={theme}
+                mode={mode}
+                status={status}
+                errorMsg={errorMsg}
+                errorLine={errorLine}
+                errorCol={errorCol}
+                onFix={forceAutoRepair}
+                onCopyFormatted={() => copyOut('formatted')}
+                onCopyMinified={() => copyOut('minified')}
+                onCopyEscaped={() => copyOut('escaped')}
+              />
             </div>
           )}
         </div>
 
-        {/* JSON Stats Footer aligned below editors */}
         <div className="stats-footer">
            <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Repaired JSON' : 'Syntax Error'}</div>
            <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
            <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
            <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
-           <div style={{flex: 1}}></div>
-           <div className="stat-pill subtle">[Cmd+Enter] Format</div>
-           <div className="stat-pill subtle">[Cmd+M] Minify</div>
         </div>
       </main>
 
