@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "String to JSON Secure Converter",
+  "version": "1.0.0",
+  "description": "100% Client-Side fast conversion of escaped stringified JSON into beautifully formatted JSON structures.",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "String to JSON Secure Converter"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": [],
+  "host_permissions": [],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}
