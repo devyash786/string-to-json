@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Braces, CheckCircle2, AlertCircle,
-  UploadCloud, Palette, Zap, ShieldCheck, BrainCircuit
+  UploadCloud, Palette, Zap, Search
 } from 'lucide-react';
 import { convertToYaml, convertToCsv, convertToTS, getJsonStats } from './utils/jsonUtils';
 import { fixJson } from './utils/fixJson';
@@ -248,19 +248,26 @@ function App() {
         )}
       </div>
 
-      <header className="header" style={{ textAlign: 'center', marginBottom: '0.5rem', paddingTop: '0.5rem' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', fontSize: '2.2rem', fontWeight: 700 }}>
-          <Braces size={32} color="var(--accent-primary)" />
+      <header className="dashboard-header">
+        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', fontSize: '2.4rem', fontWeight: 700, margin: 0 }}>
+          <Braces size={36} color="var(--accent-primary)" />
           Fix Broken JSON
         </h1>
-        <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: '520px', margin: '0.4rem auto 1rem', lineHeight: 1.4 }}>
-          100% client-side. Your data never leaves the browser.
+        <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: '520px', margin: '0.6rem auto 0', lineHeight: 1.4, opacity: 0.8 }}>
+          Turn escaped strings & broken payloads into perfect JSON instantly.
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem', marginTop: '1.5rem' }}>
-          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><Zap size={12} /> INSTANT</div>
-          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><ShieldCheck size={12} /> PRIVATE</div>
-          <div className="modular-btn" style={{ borderRadius: '20px', padding: '4px 14px', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)' }}><BrainCircuit size={12} /> SMART PARSING</div>
+        <div className="segmented-control">
+          {[
+            { id: 'formatter', label: 'Fixer', icon: <CheckCircle2 size={14}/> },
+            { id: 'diff', label: 'Compare', icon: <Search size={14}/> },
+            { id: 'yaml', label: 'To YAML', icon: <Palette size={14}/> },
+            { id: 'ts', label: 'To TS', icon: <Zap size={14}/> }
+          ].map(m => (
+            <button key={m.id} className={`segment-btn ${mode === m.id ? 'active' : ''}`} onClick={() => setMode(m.id as Mode)}>
+              {m.icon} {m.label}
+            </button>
+          ))}
         </div>
       </header>
 
@@ -318,7 +325,7 @@ function App() {
               gap: '0.5rem', 
               fontWeight: 500 
             }}>
-              {status === 'success' ? <Zap size={14} color="var(--text-success)" /> : <BrainCircuit size={14} color="var(--accent-primary)" strokeWidth={2.5} />}
+              {status === 'success' ? <Zap size={14} color="var(--text-success)" /> : <Palette size={14} color="var(--accent-primary)" strokeWidth={2.5} />}
               {suggestion}
             </div>
           )}
@@ -370,17 +377,16 @@ function App() {
           )}
         </div>
 
-        <div className="stats-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-             <div className="stat-pill"><span className="stat-label">Status:</span> <span className={`status-dot ${status}`}></span> {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid JSON' : status === 'fixing' ? 'Auto-Fixed' : 'Error'}</div>
-             <div className="stat-pill"><span className="stat-label">Size:</span> {stats.sizeKB} KB</div>
-             <div className="stat-pill"><span className="stat-label">Keys:</span> {stats.keysCount}</div>
-             <div className="stat-pill"><span className="stat-label">Depth:</span> {stats.maxDepth}</div>
-           </div>
-           <div style={{ opacity: 0.5, fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 500 }}>
-             Built for developers who hate messy JSON
-           </div>
+      <footer className="stats-footer">
+        <div className="stat-card">
+          <span className={`status-dot ${status}`}></span> 
+          {status === 'idle' ? 'Ready' : status === 'success' ? 'Valid' : 'Fixed'}
         </div>
+        <div className="stat-card">Size: <b>{stats.sizeKB} KB</b></div>
+        <div className="stat-card">Keys: <b>{stats.keysCount}</b></div>
+        <div className="stat-card">Depth: <b>{stats.maxDepth}</b></div>
+        <div className="stat-card" style={{ opacity: 0.5 }}>Built by Dev Yash</div>
+      </footer>
       </main>
 
       {toast && (

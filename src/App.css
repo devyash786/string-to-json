@@ -18,10 +18,51 @@ body, html {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 1rem;
+  padding: 1rem;
   background-color: var(--bg-main);
   transition: all var(--transition-normal);
   overflow: hidden;
+  gap: 1.25rem;
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%), 
+              var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 140px;
+  height: 140px;
+  background: var(--accent-glow);
+  filter: blur(60px);
+  opacity: 0.25;
+}
+
+.dashboard-header::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: -40px;
+  width: 100px;
+  height: 100px;
+  background: rgba(16, 185, 129, 0.2);
+  filter: blur(40px);
+  opacity: 0.2;
 }
 
 .ide-container {
@@ -201,17 +242,39 @@ body, html {
   color: var(--text-primary);
 }
 
-.badge {
+.segmented-control {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 12px;
+  margin-top: 1rem;
+  gap: 4px;
+}
+
+.segment-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  background: var(--bg-surface);
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-  font-weight: 500;
+  gap: 8px;
+}
+
+.segment-btn:hover {
+  color: var(--text-primary);
+}
+
+.segment-btn.active {
+  background: var(--bg-surface-hover);
+  color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .modular-btn {
@@ -607,11 +670,27 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0 1rem;
+  gap: 1rem;
+  padding: 0.5rem;
+  margin-top: auto;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stat-card b {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .stat-pill {
