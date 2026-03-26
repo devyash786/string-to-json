@@ -172,8 +172,10 @@ body {
 
 .editor-container {
   flex: 1;
-  height: 100%;
   position: relative;
+  min-height: 500px; /* Guarantee Monaco height calculation is not 0 */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Toolbars */

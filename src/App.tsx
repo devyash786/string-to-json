@@ -283,9 +283,9 @@ function App() {
                     <button onClick={() => handleCopy(inputData)} className="tool-btn"><Copy size={14} /> Copy</button>
                   </div>
                 </div>
-                <div className="editor-container">
+                <div className="editor-container" style={{ minHeight: '500px' }}>
                   <Editor
-                    height="100%"
+                    height="65vh"
                     defaultLanguage="json"
                     value={inputData}
                     onChange={(val) => setInputData(val || '')}
@@ -321,7 +321,7 @@ function App() {
                     </div>
                   ) : (
                     <Editor
-                      height="100%"
+                      height="65vh"
                       language={mode === 'formatter' ? 'json' : mode === 'ts' ? 'typescript' : mode}
                       value={outputData}
                       theme={theme === 'theme-light' ? 'light' : 'vs-dark'}
