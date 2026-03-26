@@ -28,6 +28,7 @@ function App() {
   const [mode, setMode] = useState<Mode>('formatter');
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
 
   const autoFormat = true; // Always on for seamless UX
 
@@ -64,37 +65,64 @@ function App() {
 
   const showToast = (message: string, type: 'success' | 'error') => setToast({ message, type });
 
-  // Core parsing mapped through fixJson util
+  // Core Processing Engine
   const processInput = useCallback(() => {
     if (!inputData.trim()) {
-      setOutputData('');
       setStatus('idle');
+      setOutputData('');
+      setStats({ sizeKB: '0.00', keysCount: 0, maxDepth: 0 });
+      setErrorLine(null);
+      setErrorCol(null);
+      setErrorMsg(null);
+      setSuggestion(null);
       return;
     }
 
     try {
-      if (mode === 'formatter') {
-        const { repaired, isFixed, error, line, col } = fixJson(inputData);
-        if (error) {
-          setOutputData('');
-          setStatus('error');
-          setErrorMsg(error);
-          setErrorLine(line);
-          setErrorCol(col);
-        } else {
-          setOutputData(repaired);
-          setStatus(isFixed ? 'fixing' : 'success');
-          setErrorMsg(null);
-        }
-      } else if (mode === 'yaml') { setOutputData(convertToYaml(inputData)); setStatus('success'); }
-      else if (mode === 'csv') { setOutputData(convertToCsv(inputData)); setStatus('success'); }
-      else if (mode === 'ts') { setOutputData(convertToTS(inputData)); setStatus('success'); }
+      // Smart Detection Banner Logic (Vercel/Linear style insight)
+      const trimmed = inputData.trim();
+      let activeSuggestion = null;
+      if (trimmed.match(/([\{\[].*[\}\]])/s) && !trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+        activeSuggestion = 'Log format detected ⸺ Extracted JSON automatically ✨';
+      } else if (trimmed.includes('\\"')) {
+        activeSuggestion = 'Escaped JSON detected ⸺ Unescaped automatically ✨';
+      } else if (trimmed.includes('True') || trimmed.includes('None') || trimmed.match(/([{,]\s*)['"][a-zA-Z0-9_]+['"]\s*:/) === null && trimmed.includes(':')) {
+        activeSuggestion = 'Broken/Python JSON detected ⸺ Auto-Repaired ✨';
+      }
+      setSuggestion(activeSuggestion);
+
+      const fixed = fixJson(inputData);
       
-      setStats(getJsonStats(inputData));
+      if (fixed.error) {
+        setStatus('error');
+        setErrorMsg(fixed.error);
+        setErrorLine(fixed.line);
+        setErrorCol(fixed.col);
+        return;
+      }
+
+      const parsed = JSON.parse(fixed.repaired);
+
+      if (mode === 'yaml') {
+        setOutputData(convertToYaml(parsed));
+      } else if (mode === 'csv') {
+        setOutputData(convertToCsv(parsed));
+      } else if (mode === 'ts') {
+        setOutputData(convertToTS(parsed));
+      } else {
+        setOutputData(JSON.stringify(parsed, null, 2));
+      }
+
+      setStatus(fixed.isFixed ? 'fixing' : 'success');
+      setErrorMsg(null);
+      setErrorLine(null);
+      setErrorCol(null);
+      
+      setStats(getJsonStats(parsed));
+
     } catch (err: any) {
-      setOutputData('');
       setStatus('error');
-      setErrorMsg(err.message || 'Syntax Error near input');
+      setErrorMsg(err.message || 'Invalid JSON format');
     }
   }, [inputData, mode]);
 
@@ -103,9 +131,9 @@ function App() {
   }, [inputData, mode, autoFormat]);
 
   const forceAutoRepair = () => {
-    const result = fixJson(inputData);
-    if (!result.error && result.repaired !== inputData) {
-      setInputData(result.repaired);
+    const fixed = fixJson(inputData);
+    if (!fixed.error && fixed.repaired !== inputData) {
+      setInputData(fixed.repaired);
       showToast('Successfully repaired Messy JSON!', 'success');
     }
   };
@@ -120,16 +148,22 @@ function App() {
     }
   };
 
-  const copyOut = (type: 'formatted' | 'minified' | 'escaped') => {
-    if (type === 'formatted') {
+  const copyOut = (format: 'formatted' | 'minified' | 'escaped' | 'js') => {
+    if (!outputData) return;
+
+    if (format === 'formatted') {
       navigator.clipboard.writeText(outputData);
       showToast('Copied Formatted', 'success');
-    } else if (type === 'minified') {
-      try { navigator.clipboard.writeText(JSON.stringify(JSON.parse(outputData))); showToast('Copied Minified', 'success'); } 
+    } else if (format === 'minified') {
+      try { navigator.clipboard.writeText(JSON.stringify(JSON.parse(outputData))); showToast('Copied Minified', 'success'); }
       catch { navigator.clipboard.writeText(outputData.replace(/\s+/g, '')); showToast('Copied Minified Space', 'success'); }
-    } else if (type === 'escaped') {
+    } else if (format === 'escaped') {
       navigator.clipboard.writeText(JSON.stringify(outputData));
       showToast('Copied Escaped', 'success');
+    } else if (format === 'js') {
+      const jsStr = outputData.replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'");
+      navigator.clipboard.writeText(jsStr);
+      showToast('Copied as JS Object', 'success');
     }
   };
 
@@ -205,8 +239,14 @@ function App() {
               onToast={showToast}
             />
           ) : (
-            <div className="split-layout">
-              <JsonEditor
+            <>
+              {suggestion && (
+                <div style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', textAlign: 'center', fontSize: '0.85rem', fontWeight: 500, borderRadius: '4px', margin: '0 1rem 0.5rem' }}>
+                  {suggestion}
+                </div>
+              )}
+              <div className="split-layout">
+                <JsonEditor
                 value={inputData}
                 onChange={setInputData}
                 theme={theme}
@@ -222,10 +262,12 @@ function App() {
                 errorLine={errorLine}
                 errorCol={errorCol}
                 onFix={forceAutoRepair}
-                onCopyFormatted={() => copyOut('formatted')}
-                onCopyMinified={() => copyOut('minified')}
-              />
-            </div>
+                  onCopyFormatted={() => copyOut('formatted')}
+                  onCopyMinified={() => copyOut('minified')}
+                  onCopyJS={() => copyOut('js')}
+                />
+              </div>
+            </>
           )}
         </div>
 
