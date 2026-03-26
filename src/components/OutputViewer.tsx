@@ -43,10 +43,10 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
 
   return (
     <div className="pane-wrapper">
-      <div className="toolbar small" style={{ borderBottom: '1px solid var(--border-color)', padding: '8px 16px', backgroundColor: 'var(--bg-main)' }}>
-        <div className="toolbar-title" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: 0 }}>
-          <strong>Fixed JSON</strong>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>Parsed result</span>
+      <div className="pane-toolbar">
+        <div className="toolbar-title">
+          FIXED JSON
+          <span className="sub-label" style={{ marginLeft: '8px' }}>Parsed result</span>
         </div>
         <div className="toolbar-actions" style={{ position: 'relative' }} ref={dropdownRef}>
           <button onClick={onCopyFormatted} className="tool-btn primary" title="Copy Output" style={{ backgroundColor: 'var(--accent-primary)', color: 'white', borderRadius: '4px', border: 'none', padding: '4px 12px', fontSize: '12px' }}><Copy size={14} /> Copy</button>
@@ -64,7 +64,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
       
       <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {!value && (
-          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', pointerEvents: 'none', zIndex: 1 }}>
+          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', opacity: 0.3, fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', pointerEvents: 'none', zIndex: 1 }}>
             Your fixed JSON will appear here
           </div>
         )}

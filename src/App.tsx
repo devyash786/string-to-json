@@ -288,7 +288,7 @@ function App() {
             />
           ) : (
             <div className="split-layout" ref={splitRef} style={{ height: '100%', display: 'flex', flex: 1 }}>
-              <div style={{ height: '100%', flex: `0 0 ${leftWidth}%`, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
+              <div className="split-pane" style={{ height: '100%', flex: `0 0 ${leftWidth}%`, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
                 <JsonEditor
                   value={inputData}
                   onChange={setInputData}
@@ -299,13 +299,13 @@ function App() {
               </div>
 
               <div
+                className="resizer-handle"
                 onMouseDown={handleMouseDown}
-                style={{ width: '4px', cursor: 'col-resize', backgroundColor: 'var(--border-color)', zIndex: 10, transition: 'background 0.2s', flexShrink: 0, height: '100%' }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-primary)'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--border-color)'}
               ></div>
 
-              <div style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
+              <div className="split-pane" style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
                 <OutputViewer
                   value={outputData}
                   theme={theme}

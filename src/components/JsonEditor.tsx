@@ -37,9 +37,9 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
   return (
     <div className="pane-wrapper">
       <div className="pane-toolbar">
-        <div className="toolbar-title" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-          <strong>Original input</strong>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>Paste your escaped string</span>
+        <div className="toolbar-title">
+          ORIGINAL INPUT
+          <span className="sub-label" style={{ marginLeft: '8px' }}>Paste your escaped string</span>
         </div>
         <div className="toolbar-actions">
           <button onClick={() => setShowSearch(!showSearch)} className={`tool-btn ${showSearch ? 'active' : ''}`} title="Search (Cmd+F)"><SearchIcon size={14} /> Search</button>
@@ -50,11 +50,11 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({ value, onChange, theme, 
       
       <div style={{ height: '100%', flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {value === '' && (
-          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', pointerEvents: 'none', zIndex: 1, whiteSpace: 'pre' }}>
+          <div style={{ position: 'absolute', top: '16px', left: '16px', color: 'var(--text-muted)', opacity: 0.3, fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', pointerEvents: 'none', zIndex: 1 }}>
             {'"{\\"name\\":\\"Yash\\",\\"role\\":\\"developer\\"}"'}
           </div>
         )}
-        <div style={{ position: 'absolute', bottom: '12px', left: '16px', fontSize: '11px', color: 'var(--text-muted)', zIndex: 5, pointerEvents: 'none', opacity: 0.6 }}>
+        <div style={{ position: 'absolute', bottom: '12px', left: '16px', fontSize: '10px', color: 'var(--text-muted)', zIndex: 5, pointerEvents: 'none', opacity: 0.4 }}>
           ⌘ Enter to parse
         </div>
         {showSearch && (
